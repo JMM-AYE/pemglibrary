@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MessagesIndexRouteImport } from './routes/messages.index'
+import { Route as ArticlesIndexRouteImport } from './routes/articles.index'
 import { Route as MessagesSlugRouteImport } from './routes/messages.$slug'
+import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,39 +25,68 @@ const MessagesIndexRoute = MessagesIndexRouteImport.update({
   path: '/messages/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArticlesIndexRoute = ArticlesIndexRouteImport.update({
+  id: '/articles/',
+  path: '/articles/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MessagesSlugRoute = MessagesSlugRouteImport.update({
   id: '/messages/$slug',
   path: '/messages/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
+  id: '/articles/$slug',
+  path: '/articles/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
+  '/articles/': typeof ArticlesIndexRoute
   '/messages/': typeof MessagesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
+  '/articles': typeof ArticlesIndexRoute
   '/messages': typeof MessagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
+  '/articles/': typeof ArticlesIndexRoute
   '/messages/': typeof MessagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/messages/$slug' | '/messages/'
+  fullPaths:
+    | '/'
+    | '/articles/$slug'
+    | '/messages/$slug'
+    | '/articles/'
+    | '/messages/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/messages/$slug' | '/messages'
-  id: '__root__' | '/' | '/messages/$slug' | '/messages/'
+  to: '/' | '/articles/$slug' | '/messages/$slug' | '/articles' | '/messages'
+  id:
+    | '__root__'
+    | '/'
+    | '/articles/$slug'
+    | '/messages/$slug'
+    | '/articles/'
+    | '/messages/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArticlesSlugRoute: typeof ArticlesSlugRoute
   MessagesSlugRoute: typeof MessagesSlugRoute
+  ArticlesIndexRoute: typeof ArticlesIndexRoute
   MessagesIndexRoute: typeof MessagesIndexRoute
 }
 
@@ -75,6 +106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/articles/': {
+      id: '/articles/'
+      path: '/articles'
+      fullPath: '/articles/'
+      preLoaderRoute: typeof ArticlesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/messages/$slug': {
       id: '/messages/$slug'
       path: '/messages/$slug'
@@ -82,12 +120,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/articles/$slug': {
+      id: '/articles/$slug'
+      path: '/articles/$slug'
+      fullPath: '/articles/$slug'
+      preLoaderRoute: typeof ArticlesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArticlesSlugRoute: ArticlesSlugRoute,
   MessagesSlugRoute: MessagesSlugRoute,
+  ArticlesIndexRoute: ArticlesIndexRoute,
   MessagesIndexRoute: MessagesIndexRoute,
 }
 export const routeTree = rootRouteImport
