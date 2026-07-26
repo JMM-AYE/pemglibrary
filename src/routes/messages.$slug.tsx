@@ -49,7 +49,7 @@ function MessagePage() {
 
           <h2 className="display mt-12 text-2xl">Message notes</h2>
           <ul className="mt-5 space-y-4">
-            {message.notes.map((note) => (
+            {message.notes.map((note: string) => (
               <li key={note} className="flex gap-4 border-b border-border pb-4 text-sm">
                 <span className="text-primary" aria-hidden="true">
                   &#9679;
