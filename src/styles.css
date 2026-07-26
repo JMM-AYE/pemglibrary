@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
 /*
  * Design system definition.
  *
@@ -59,29 +64,37 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 1.25rem;
+  --background: oklch(0.145 0.008 60);
+  --foreground: oklch(0.965 0.006 80);
+  --surface: oklch(0.185 0.01 60);
+  --surface-2: oklch(0.235 0.014 62);
+  --card: oklch(0.19 0.011 62);
+  --card-foreground: oklch(0.965 0.006 80);
+  --popover: oklch(0.19 0.011 62);
+  --popover-foreground: oklch(0.965 0.006 80);
+  --gold: oklch(0.82 0.152 79);
+  --gold-soft: oklch(0.9 0.09 85);
+  --primary: oklch(0.82 0.152 79);
+  --primary-foreground: oklch(0.17 0.02 70);
+  --secondary: oklch(0.235 0.014 62);
+  --secondary-foreground: oklch(0.965 0.006 80);
+  --muted: oklch(0.235 0.014 62);
+  --muted-foreground: oklch(0.72 0.017 75);
+  --accent: oklch(0.28 0.03 66);
+  --accent-foreground: oklch(0.965 0.006 80);
+  --destructive: oklch(0.6 0.21 27);
+  --destructive-foreground: oklch(0.98 0.003 80);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.82 0.152 79);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -95,6 +108,18 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  --gradient-gold: linear-gradient(100deg, var(--gold-soft), var(--gold));
+  --gradient-veil: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--background) 10%, transparent) 0%,
+    color-mix(in oklab, var(--background) 70%, transparent) 55%,
+    var(--background) 100%
+  );
+  --shadow-lift: 0 30px 70px -30px oklch(0 0 0 / 0.8);
+  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--gold) 35%, transparent),
+    0 24px 60px -24px color-mix(in oklab, var(--gold) 45%, transparent);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dark {
@@ -140,5 +165,64 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--gold);
+    color: var(--primary-foreground);
+  }
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+}
+
+@utility eyebrow {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  color: var(--gold);
+}
+
+@utility gold-text {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility veil {
+  background-image: var(--gradient-veil);
+}
+
+@utility card-lift {
+  transition:
+    transform 0.6s var(--ease-out-expo),
+    box-shadow 0.6s var(--ease-out-expo),
+    border-color 0.4s ease;
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lift);
+    border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+  }
+}
+
+@utility reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo);
+  &[data-visible="true"] {
+    opacity: 1;
+    transform: none;
   }
 }
