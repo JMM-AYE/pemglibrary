@@ -12,13 +12,15 @@ const tiles = [
 
 /** Rows of the poster wall. `hero` tiles sit in front, lit and glowing. */
 const rows = [
-  [0, 1, 2, 3, 4],
-  [5, 2, 0, 1, 3],
-  [4, 3, 5, 2, 0],
-  [1, 0, 4, 5, 2],
+  [0, 1, 2, 3, 4, 5],
+  [5, 2, 0, 1, 3, 4],
+  [4, 3, 5, 2, 0, 1],
+  [1, 0, 4, 5, 2, 3],
+  [2, 5, 1, 3, 4, 0],
+  [3, 4, 2, 0, 5, 1],
 ];
 
-const heroKeys = new Set(["1-1", "1-3", "2-2", "0-2"]);
+const heroKeys = new Set(["1-1", "1-3", "2-2", "2-4", "3-1"]);
 
 export function HeroMosaic() {
   return (
@@ -26,13 +28,13 @@ export function HeroMosaic() {
       {/* poster wall */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -top-24 flex flex-col gap-4 sm:gap-6"
+        className="pointer-events-none absolute inset-0 flex flex-col justify-center gap-3 sm:gap-5"
         style={{ perspective: "1400px" }}
       >
         {rows.map((row, r) => (
           <div
             key={r}
-            className="flex shrink-0 gap-4 sm:gap-6"
+            className="flex shrink-0 gap-3 sm:gap-5"
             style={{
               transform: `translateX(${r % 2 === 0 ? "-4%" : "-11%"}) rotate(-4deg)`,
             }}
@@ -42,7 +44,7 @@ export function HeroMosaic() {
               return (
                 <div
                   key={`${r}-${c}`}
-                  className={`relative aspect-[16/10] w-[38vw] shrink-0 overflow-hidden rounded-xl sm:w-[26vw] lg:w-[22vw] ${
+                  className={`relative aspect-[16/10] w-[34vw] shrink-0 overflow-hidden rounded-xl sm:w-[24vw] lg:w-[19vw] ${
                     isHero
                       ? "z-10 scale-[1.06] shadow-[var(--shadow-glow)] ring-1 ring-[color-mix(in_oklab,var(--gold)_60%,transparent)]"
                       : "opacity-45 blur-[2px]"
