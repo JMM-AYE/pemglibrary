@@ -29,7 +29,8 @@ export const Route = createFileRoute("/messages/$slug")({
 function MessagePage() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(sermonsQueryOptions);
-  const sermon = data.sermons.find((s) => s.slug === slug) ?? Route.useLoaderData();
+  const sermon = data.sermons.find((s) => s.slug === slug);
+  if (!sermon) return null;
   const related = data.sermons.filter((s) => s.slug !== sermon.slug).slice(0, 3);
 
   return (
