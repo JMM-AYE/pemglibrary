@@ -78,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "The Living Word Library" },
+      { title: "PEMG Library — Pastor Enoch Message Group" },
       {
         name: "description",
         content:
           "Stream teachings, watch message series and read articles from the digital library.",
       },
-      { name: "author", content: "The Living Word Library" },
-      { property: "og:title", content: "The Living Word Library" },
+      { name: "author", content: "PEMG Library — Pastor Enoch Message Group" },
+      { property: "og:title", content: "PEMG Library — Pastor Enoch Message Group" },
       {
         property: "og:description",
         content:

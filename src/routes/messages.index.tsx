@@ -10,9 +10,9 @@ const DESCRIPTION =
 export const Route = createFileRoute("/messages/")({
   head: () => ({
     meta: [
-      { title: "Messages — LivingWord Library" },
+      { title: "Messages — PEMG Library" },
       { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: "Messages — LivingWord Library" },
+      { property: "og:title", content: "Messages — PEMG Library" },
       { property: "og:description", content: DESCRIPTION },
     ],
   }),

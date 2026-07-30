@@ -11,7 +11,7 @@ export const Route = createFileRoute("/articles/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.title} — LivingWord Library` },
+          { title: `${loaderData.title} — PEMG Library` },
           { name: "description", content: loaderData.excerpt },
           { property: "og:title", content: loaderData.title },
           { property: "og:description", content: loaderData.excerpt },

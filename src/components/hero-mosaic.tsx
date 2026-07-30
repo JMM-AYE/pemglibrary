@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { covers, messages } from "@/data/library";
 
 const tiles = [
@@ -87,21 +88,22 @@ export function HeroMosaic() {
             Word into everyday life.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href={`/messages/${messages[0].slug}`}
+            <Link
+              to="/messages/$slug"
+              params={{ slug: messages[0].slug }}
               className="inline-flex items-center gap-3 rounded-full bg-primary px-7 py-4 text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:scale-[1.04]"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
                 <path d="M8 5v14l11-7z" />
               </svg>
               Start watching
-            </a>
-            <a
-              href="/messages"
+            </Link>
+            <Link
+              to="/messages"
               className="inline-flex items-center gap-3 rounded-full border border-border px-7 py-4 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
             >
               Browse the library
-            </a>
+            </Link>
           </div>
         </div>
       </div>
