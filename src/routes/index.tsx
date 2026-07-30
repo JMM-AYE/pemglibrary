@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { articles, formatDate, messages } from "@/data/library";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { articles } from "@/data/library";
+import { formatSermonDate, sermonsQueryOptions } from "@/lib/sermons";
+import { SermonCard, SermonThumb } from "@/components/sermon-card";
 import { HeroMosaic } from "@/components/hero-mosaic";
-import { ArticleCard, MessageCard } from "@/components/cards";
+import { ArticleCard } from "@/components/cards";
 import { Reveal } from "@/components/reveal";
 
 const DESCRIPTION =
@@ -16,12 +19,16 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: DESCRIPTION },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(sermonsQueryOptions),
   component: Index,
 });
 
 function Index() {
-  const featured = messages[0];
-  const latest = messages.slice(1, 4);
+  const { data } = useSuspenseQuery(sermonsQueryOptions);
+  const featured = data.sermons[0];
+  const latest = data.sermons.slice(1, 7);
+
+  if (!featured) return <HeroMosaic />;
 
   return (
     <>
@@ -56,12 +63,8 @@ function Index() {
               params={{ slug: featured.slug }}
               className="group relative block aspect-video overflow-hidden rounded-3xl border border-border"
             >
-              <img
-                src={featured.cover}
-                alt={featured.title}
-                loading="lazy"
-                width={1280}
-                height={800}
+              <SermonThumb
+                sermon={featured}
                 className="h-full w-full object-cover transition-transform duration-[1200ms] ease-[var(--ease-out-expo)] group-hover:scale-105"
               />
               <span className="absolute inset-0 grid place-items-center bg-background/30">
@@ -75,10 +78,9 @@ function Index() {
             <div>
               <p className="eyebrow">{featured.series}</p>
               <h2 className="display mt-3 text-4xl sm:text-5xl">{featured.title}</h2>
-              <p className="mt-5 text-muted-foreground">{featured.summary}</p>
+              <p className="mt-5 line-clamp-4 text-muted-foreground">{featured.summary}</p>
               <p className="mt-6 text-sm text-muted-foreground">
-                {featured.scripture} &middot; {featured.duration} &middot;{" "}
-                {formatDate(featured.date)}
+                {featured.series} &middot; {formatSermonDate(featured.date)}
               </p>
               <Link
                 to="/messages/$slug"
@@ -103,9 +105,9 @@ function Index() {
           </Link>
         </div>
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {latest.map((message, i) => (
-            <Reveal key={message.slug} delay={i * 90}>
-              <MessageCard message={message} />
+          {latest.map((sermon, i) => (
+            <Reveal key={sermon.slug} delay={i * 90}>
+              <SermonCard sermon={sermon} />
             </Reveal>
           ))}
         </div>
