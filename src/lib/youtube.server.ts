@@ -16,6 +16,16 @@ function decode(s: string) {
     .replace(/&amp;/g, "&");
 }
 
+const SERIES_HINT = /service|praise|conference|convention|fast|prayer|study|encounter|night|hour|program|summit|camp/i;
+const DATE_LIKE = /^(\d|day\b|week\b)/i;
+
+function seriesFrom(parts: string[]) {
+  const tagged = parts.slice(1).find((p) => SERIES_HINT.test(p) && !DATE_LIKE.test(p));
+  if (tagged) return tagged;
+  if (SERIES_HINT.test(parts[0] ?? "")) return "Services";
+  return "Messages";
+}
+
 export async function fetchChannelSermons(channelId: string): Promise<Sermon[]> {
   const res = await fetch(`${FEED}${encodeURIComponent(channelId)}`, {
     headers: { accept: "application/atom+xml" },
@@ -38,7 +48,7 @@ export async function fetchChannelSermons(channelId: string): Promise<Sermon[]> 
       slug: id,
       videoId: id,
       title: parts[0] || rawTitle,
-      series: parts[1] || "Messages",
+      series: seriesFrom(parts),
       date: pick(entry, /<published>([^<]+)<\/published>/),
       summary: description || rawTitle,
       cover: `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
