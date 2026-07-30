@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { articles, covers, formatDate, messages } from "@/data/library";
+import { articles, formatDate, messages } from "@/data/library";
+import { HeroMosaic } from "@/components/hero-mosaic";
 import { ArticleCard, MessageCard } from "@/components/cards";
 import { Reveal } from "@/components/reveal";
 
@@ -9,9 +10,9 @@ const DESCRIPTION =
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LivingWord Library — Messages & Articles" },
+      { title: "PEMG Library — Messages & Articles" },
       { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: "LivingWord Library — Messages & Articles" },
+      { property: "og:title", content: "PEMG Library — Messages & Articles" },
       { property: "og:description", content: DESCRIPTION },
     ],
   }),
@@ -24,34 +25,7 @@ function Index() {
 
   return (
     <>
-      <section className="relative flex min-h-[100svh] items-end overflow-hidden">
-        <img
-          src={covers.heroAuditorium}
-          alt="Congregation with hands raised in a darkened auditorium"
-          width={1920}
-          height={1200}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 veil" />
-        <div className="relative mx-auto w-full max-w-7xl px-5 pb-20 pt-32 sm:px-8">
-          <p className="eyebrow">The digital library</p>
-          <h1 className="display mt-5 text-[clamp(3rem,11vw,9rem)]">
-            The word,
-            <br />
-            <span className="gold-text">on demand.</span>
-          </h1>
-          <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <p className="max-w-md text-base text-muted-foreground">{DESCRIPTION}</p>
-            <Link
-              to="/messages"
-              className="inline-flex w-fit items-center gap-3 rounded-full bg-primary px-7 py-4 text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:scale-[1.04]"
-            >
-              Browse messages
-              <span aria-hidden="true">&rarr;</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HeroMosaic />
 
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
         <Reveal>

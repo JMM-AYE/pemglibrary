@@ -26,7 +26,7 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
         <Link to="/" className="display text-xl tracking-tight">
-          Living<span className="gold-text">Word</span>
+          <span className="gold-text">PEMG</span> Library
         </Link>
 
         <nav className="hidden items-center gap-9 md:flex">
@@ -88,7 +88,7 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-12 sm:flex-row sm:items-end sm:justify-between sm:px-8">
         <div>
           <p className="display text-3xl leading-none sm:text-4xl">
-            Living<span className="gold-text">Word</span>
+            <span className="gold-text">PEMG</span> Library
           </p>
           <p className="mt-3 max-w-sm text-sm text-muted-foreground">
             A digital library of messages and articles. Watch, read, and take the Word with
@@ -105,7 +105,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-border py-5 text-center text-xs text-muted-foreground">
-        &copy; {new Date().getFullYear()} LivingWord Library. All rights reserved.
+        &copy; {new Date().getFullYear()} PEMG Library. All rights reserved.
       </div>
     </footer>
   );

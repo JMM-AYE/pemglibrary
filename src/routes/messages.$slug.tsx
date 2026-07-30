@@ -12,7 +12,7 @@ export const Route = createFileRoute("/messages/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.title} — LivingWord Library` },
+          { title: `${loaderData.title} — PEMG Library` },
           { name: "description", content: loaderData.summary },
           { property: "og:title", content: loaderData.title },
           { property: "og:description", content: loaderData.summary },
