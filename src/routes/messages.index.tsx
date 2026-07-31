@@ -25,10 +25,13 @@ function MessagesPage() {
   const { data } = useSuspenseQuery(sermonsQueryOptions);
   const sermons = data.sermons;
 
-  const seriesList = useMemo(
-    () => ["All", ...Array.from(new Set(sermons.map((s) => s.series)))],
-    [sermons],
-  );
+  // Playlist names come from YouTube; keep only the ones that have videos.
+  const seriesList = useMemo(() => {
+    const present = new Set(sermons.map((s) => s.series));
+    const ordered = (data.series ?? []).filter((name) => present.has(name));
+    const extras = [...present].filter((name) => !ordered.includes(name));
+    return ["All", ...ordered, ...extras];
+  }, [sermons, data.series]);
   const [series, setSeries] = useState("All");
   const [query, setQuery] = useState("");
 
