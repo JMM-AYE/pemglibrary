@@ -65,14 +65,14 @@ export function HeroMosaic({ sermons = [] }: { sermons?: Sermon[] }) {
                     <span className="absolute inset-0 bg-background/45 transition-opacity duration-500 group-hover/tile:opacity-0" />
                   )}
                   {sermon && (
-                    <span className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-background via-background/40 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100">
+                    <span className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-background via-background/70 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100">
                       <span className="flex items-center gap-2">
                         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
                           <svg viewBox="0 0 24 24" className="ml-0.5 h-3 w-3 fill-current" aria-hidden="true">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         </span>
-                        <span className="line-clamp-2 text-left text-[11px] font-semibold leading-tight sm:text-xs">
+                        <span className="line-clamp-2 text-left text-[11px] font-semibold leading-tight text-foreground drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)] sm:text-xs">
                           {sermon.title}
                         </span>
                       </span>
