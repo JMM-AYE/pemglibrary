@@ -11,34 +11,31 @@ const fallbackTiles = [
   covers.articlePrayer,
 ];
 
-/** Rows of the poster wall. `hero` tiles sit in front, lit and glowing. */
-const rows = [
-  [0, 1, 2, 3, 4, 5],
-  [5, 2, 0, 1, 3, 4],
-  [4, 3, 5, 2, 0, 1],
-  [1, 0, 4, 5, 2, 3],
-  [2, 5, 1, 3, 4, 0],
-  [3, 4, 2, 0, 5, 1],
-];
+const COLS = 6;
+const ROWS = 6;
 
+/** Tiles that sit in front by default — lit and glowing like the reference wall. */
 const heroKeys = new Set(["1-1", "1-3", "2-2", "2-4", "3-1"]);
 
 export function HeroMosaic({ sermons = [] }: { sermons?: Sermon[] }) {
-  // Real sermon thumbnails build the wall; generated art only fills the gaps.
-  const tiles = Array.from({ length: 6 }, (_, i) =>
-    sermons[i] ? sermons[i].coverFallback : fallbackTiles[i],
+  // Each tile is a distinct sermon so hovering previews the message it opens.
+  const wall = Array.from({ length: ROWS }, (_, r) =>
+    Array.from({ length: COLS }, (_, c) => {
+      const i = r * COLS + c;
+      return sermons.length ? sermons[i % sermons.length] : null;
+    }),
   );
+
   const firstSlug = sermons[0]?.slug;
 
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden">
       {/* poster wall */}
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex flex-col justify-center gap-3 sm:gap-5"
+        className="absolute inset-0 flex flex-col justify-center gap-3 sm:gap-5"
         style={{ perspective: "1400px" }}
       >
-        {rows.map((row, r) => (
+        {wall.map((row, r) => (
           <div
             key={r}
             className="flex shrink-0 gap-3 sm:gap-5"
@@ -46,26 +43,57 @@ export function HeroMosaic({ sermons = [] }: { sermons?: Sermon[] }) {
               transform: `translateX(${r % 2 === 0 ? "-4%" : "-11%"}) rotate(-4deg)`,
             }}
           >
-            {row.map((t, c) => {
+            {row.map((sermon, c) => {
               const isHero = heroKeys.has(`${r}-${c}`);
-              return (
-                <div
-                  key={`${r}-${c}`}
-                  className={`relative aspect-[16/10] w-[34vw] shrink-0 overflow-hidden rounded-xl sm:w-[24vw] lg:w-[19vw] ${
-                    isHero
-                      ? "z-10 scale-[1.06] shadow-[var(--shadow-glow)] ring-1 ring-[color-mix(in_oklab,var(--gold)_60%,transparent)]"
-                      : "opacity-45 blur-[2px]"
-                  }`}
-                >
+              const tileClass = `group/tile relative aspect-[16/10] w-[34vw] shrink-0 overflow-hidden rounded-xl transition-all duration-500 ease-[var(--ease-out-expo)] sm:w-[24vw] lg:w-[19vw] ${
+                isHero
+                  ? "z-10 scale-[1.06] shadow-[var(--shadow-glow)] ring-1 ring-[color-mix(in_oklab,var(--gold)_60%,transparent)]"
+                  : "opacity-45 blur-[2px]"
+              } hover:z-20 hover:scale-[1.12] hover:opacity-100 hover:blur-0 hover:shadow-[var(--shadow-glow)] hover:ring-2 hover:ring-[color-mix(in_oklab,var(--gold)_80%,transparent)] focus-visible:z-20 focus-visible:scale-[1.12] focus-visible:opacity-100 focus-visible:blur-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`;
+
+              const media = (
+                <>
                   <img
-                    src={tiles[t]}
-                    alt=""
+                    src={sermon ? sermon.coverFallback : fallbackTiles[(r + c) % 6]}
+                    alt={sermon ? sermon.title : ""}
                     loading={r < 2 ? "eager" : "lazy"}
                     width={640}
                     height={400}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-[900ms] ease-[var(--ease-out-expo)] group-hover/tile:scale-105"
                   />
-                  {!isHero && <span className="absolute inset-0 bg-background/45" />}
+                  {!isHero && (
+                    <span className="absolute inset-0 bg-background/45 transition-opacity duration-500 group-hover/tile:opacity-0" />
+                  )}
+                  {sermon && (
+                    <span className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-background via-background/70 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100">
+                      <span className="flex items-center gap-2">
+                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+                          <svg viewBox="0 0 24 24" className="ml-0.5 h-3 w-3 fill-current" aria-hidden="true">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                        <span className="line-clamp-2 text-left text-[11px] font-semibold leading-tight text-foreground drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)] sm:text-xs">
+                          {sermon.title}
+                        </span>
+                      </span>
+                    </span>
+                  )}
+                </>
+              );
+
+              return sermon ? (
+                <Link
+                  key={`${r}-${c}`}
+                  to="/messages/$slug"
+                  params={{ slug: sermon.slug }}
+                  title={sermon.title}
+                  className={tileClass}
+                >
+                  {media}
+                </Link>
+              ) : (
+                <div key={`${r}-${c}`} aria-hidden="true" className={tileClass}>
+                  {media}
                 </div>
               );
             })}
@@ -76,7 +104,7 @@ export function HeroMosaic({ sermons = [] }: { sermons?: Sermon[] }) {
       {/* atmospheric wash */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_10%,transparent_0%,color-mix(in_oklab,var(--background)_75%,transparent)_55%,var(--background)_100%)]"
+        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(120%_70%_at_50%_10%,transparent_0%,color-mix(in_oklab,var(--background)_75%,transparent)_55%,var(--background)_100%)]"
       />
 
       {/* curved brand plate */}
