@@ -104,7 +104,7 @@ export function HeroMosaic({ sermons = [] }: { sermons?: Sermon[] }) {
       {/* atmospheric wash */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_10%,transparent_0%,color-mix(in_oklab,var(--background)_75%,transparent)_55%,var(--background)_100%)]"
+        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(120%_70%_at_50%_10%,transparent_0%,color-mix(in_oklab,var(--background)_75%,transparent)_55%,var(--background)_100%)]"
       />
 
       {/* curved brand plate */}
