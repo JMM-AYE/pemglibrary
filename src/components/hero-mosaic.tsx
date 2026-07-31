@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { covers, messages } from "@/data/library";
+import { covers } from "@/data/library";
+import type { Sermon } from "@/lib/youtube-types";
 
-const tiles = [
+const fallbackTiles = [
   covers.seriesDawn,
   covers.seriesWord,
   covers.heroAuditorium,
@@ -22,7 +23,13 @@ const rows = [
 
 const heroKeys = new Set(["1-1", "1-3", "2-2", "2-4", "3-1"]);
 
-export function HeroMosaic() {
+export function HeroMosaic({ sermons = [] }: { sermons?: Sermon[] }) {
+  // Real sermon thumbnails build the wall; generated art only fills the gaps.
+  const tiles = Array.from({ length: 6 }, (_, i) =>
+    sermons[i] ? sermons[i].coverFallback : fallbackTiles[i],
+  );
+  const firstSlug = sermons[0]?.slug;
+
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden">
       {/* poster wall */}
@@ -90,16 +97,18 @@ export function HeroMosaic() {
             Word into everyday life.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/messages/$slug"
-              params={{ slug: messages[0].slug }}
-              className="inline-flex items-center gap-3 rounded-full bg-primary px-7 py-4 text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:scale-[1.04]"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              Start watching
-            </Link>
+            {firstSlug && (
+              <Link
+                to="/messages/$slug"
+                params={{ slug: firstSlug }}
+                className="inline-flex items-center gap-3 rounded-full bg-primary px-7 py-4 text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:scale-[1.04]"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Start watching
+              </Link>
+            )}
             <Link
               to="/messages"
               className="inline-flex items-center gap-3 rounded-full border border-border px-7 py-4 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
