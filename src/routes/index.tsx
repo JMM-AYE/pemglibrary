@@ -28,11 +28,11 @@ function Index() {
   const featured = data.sermons[0];
   const latest = data.sermons.slice(1, 7);
 
-  if (!featured) return <HeroMosaic />;
+  if (!featured) return <HeroMosaic sermons={data.sermons} />;
 
   return (
     <>
-      <HeroMosaic />
+      <HeroMosaic sermons={data.sermons} />
 
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
         <Reveal>
