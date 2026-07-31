@@ -12,5 +12,6 @@ export function formatSermonDate(iso: string) {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "UTC",
   });
 }
