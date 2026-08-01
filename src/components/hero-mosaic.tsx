@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { covers } from "@/data/library";
+import { formatSermonDate } from "@/lib/sermons";
 import type { Sermon } from "@/lib/youtube-types";
 
 const fallbackTiles = [
@@ -11,125 +12,115 @@ const fallbackTiles = [
   covers.articlePrayer,
 ];
 
-const COLS = 6;
-const ROWS = 6;
+const COLS = 7;
+const ROWS = 5;
 
-/** Tiles that sit in front by default — lit and glowing like the reference wall. */
-const heroKeys = new Set(["1-1", "1-3", "2-2", "2-4", "3-1"]);
+/** Subtle sermon wall — kept behind the ember wash as texture, not as the subject. */
+function PosterWall({ sermons }: { sermons: Sermon[] }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 flex flex-col justify-center gap-4 opacity-[0.22] mix-blend-luminosity"
+      style={{ perspective: "1400px" }}
+    >
+      {Array.from({ length: ROWS }, (_, r) => (
+        <div
+          key={r}
+          className="flex shrink-0 gap-4"
+          style={{ transform: `translateX(${r % 2 === 0 ? "-6%" : "-13%"}) rotate(-4deg)` }}
+        >
+          {Array.from({ length: COLS }, (_, c) => {
+            const i = r * COLS + c;
+            const sermon = sermons.length ? sermons[i % sermons.length] : null;
+            return (
+              <div
+                key={c}
+                className="aspect-[16/10] w-[30vw] shrink-0 overflow-hidden rounded-xl sm:w-[22vw] lg:w-[17vw]"
+              >
+                <img
+                  src={sermon ? sermon.coverFallback : fallbackTiles[(r + c) % 6]}
+                  alt=""
+                  loading={r < 2 ? "eager" : "lazy"}
+                  width={640}
+                  height={400}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function HeroMosaic({ sermons = [] }: { sermons?: Sermon[] }) {
-  // Each tile is a distinct sermon so hovering previews the message it opens.
-  const wall = Array.from({ length: ROWS }, (_, r) =>
-    Array.from({ length: COLS }, (_, c) => {
-      const i = r * COLS + c;
-      return sermons.length ? sermons[i % sermons.length] : null;
-    }),
-  );
-
-  const firstSlug = sermons[0]?.slug;
+  const exclusive = sermons[0];
+  const newMessages = sermons.slice(1, 4);
 
   return (
-    <section className="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden">
-      {/* poster wall */}
-      <div
-        className="absolute inset-0 flex flex-col justify-center gap-3 sm:gap-5"
-        style={{ perspective: "1400px" }}
-      >
-        {wall.map((row, r) => (
-          <div
-            key={r}
-            className="flex shrink-0 gap-3 sm:gap-5"
-            style={{
-              transform: `translateX(${r % 2 === 0 ? "-4%" : "-11%"}) rotate(-4deg)`,
-            }}
-          >
-            {row.map((sermon, c) => {
-              const isHero = heroKeys.has(`${r}-${c}`);
-              const tileClass = `group/tile relative aspect-[16/10] w-[34vw] shrink-0 overflow-hidden rounded-xl transition-all duration-500 ease-[var(--ease-out-expo)] sm:w-[24vw] lg:w-[19vw] ${
-                isHero
-                  ? "z-10 scale-[1.06] shadow-[var(--shadow-glow)] ring-1 ring-[color-mix(in_oklab,var(--gold)_60%,transparent)]"
-                  : "opacity-45 blur-[2px]"
-              } hover:z-20 hover:scale-[1.12] hover:opacity-100 hover:blur-0 hover:shadow-[var(--shadow-glow)] hover:ring-2 hover:ring-[color-mix(in_oklab,var(--gold)_80%,transparent)] focus-visible:z-20 focus-visible:scale-[1.12] focus-visible:opacity-100 focus-visible:blur-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`;
-
-              const media = (
-                <>
-                  <img
-                    src={sermon ? sermon.coverFallback : fallbackTiles[(r + c) % 6]}
-                    alt={sermon ? sermon.title : ""}
-                    loading={r < 2 ? "eager" : "lazy"}
-                    width={640}
-                    height={400}
-                    className="h-full w-full object-cover transition-transform duration-[900ms] ease-[var(--ease-out-expo)] group-hover/tile:scale-105"
-                  />
-                  {!isHero && (
-                    <span className="absolute inset-0 bg-background/45 transition-opacity duration-500 group-hover/tile:opacity-0" />
-                  )}
-                  {sermon && (
-                    <span className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-background via-background/70 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover/tile:opacity-100 group-focus-visible/tile:opacity-100">
-                      <span className="flex items-center gap-2">
-                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-                          <svg viewBox="0 0 24 24" className="ml-0.5 h-3 w-3 fill-current" aria-hidden="true">
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        </span>
-                        <span className="line-clamp-2 text-left text-[11px] font-semibold leading-tight text-foreground drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)] sm:text-xs">
-                          {sermon.title}
-                        </span>
-                      </span>
-                    </span>
-                  )}
-                </>
-              );
-
-              return sermon ? (
-                <Link
-                  key={`${r}-${c}`}
-                  to="/messages/$slug"
-                  params={{ slug: sermon.slug }}
-                  title={sermon.title}
-                  className={tileClass}
-                >
-                  {media}
-                </Link>
-              ) : (
-                <div key={`${r}-${c}`} aria-hidden="true" className={tileClass}>
-                  {media}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      {/* atmospheric wash */}
+    <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
+      {/* ember field */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(120%_70%_at_50%_10%,transparent_0%,color-mix(in_oklab,var(--background)_75%,transparent)_55%,var(--background)_100%)]"
+        className="absolute inset-0 -z-20"
+        style={{ backgroundImage: "var(--gradient-ember)" }}
+      />
+      <div className="absolute inset-0 -z-10">
+        <PosterWall sermons={sermons} />
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_50%_20%,transparent_0%,color-mix(in_oklab,var(--ember)_45%,transparent)_60%,color-mix(in_oklab,var(--background)_70%,transparent)_100%)]"
       />
 
-      {/* curved brand plate */}
-      <div className="relative w-full">
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-[-20%] bottom-0 top-[-6rem] rounded-t-[100%] bg-[radial-gradient(100%_100%_at_50%_100%,color-mix(in_oklab,var(--gold)_16%,var(--background))_0%,var(--background)_70%)] ring-1 ring-[color-mix(in_oklab,var(--gold)_25%,transparent)]"
-        />
-        <div className="relative mx-auto max-w-3xl px-5 pb-16 pt-10 text-center sm:px-8 sm:pb-20">
-          <h1 className="display text-[clamp(3rem,12vw,7rem)] leading-none">
-            <span className="gold-text">PEMG</span> Library
-          </h1>
-          <p className="mt-4 text-sm uppercase tracking-[0.3em] text-muted-foreground">
-            Pastor Enoch Message Group
+      {/* wordmark */}
+      <div className="relative px-4 pt-28 sm:px-8 sm:pt-32">
+        <h1 className="display text-center text-[clamp(4rem,19vw,17rem)] leading-[0.82] text-white/95 drop-shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+          Library
+        </h1>
+        <p className="mt-2 text-center text-[0.7rem] uppercase tracking-[0.42em] text-white/70 sm:text-xs">
+          Pastor Enoch Message Group
+        </p>
+      </div>
+
+      {/* content deck */}
+      <div className="relative mx-auto grid w-full max-w-7xl flex-1 items-end gap-10 px-5 pb-16 pt-12 sm:px-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div>
+          <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-white">
+            New messages
           </p>
-          <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground">
-            Every message, every series — streaming on demand, with articles that carry the
-            Word into everyday life.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            {firstSlug && (
+          <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
+            {newMessages.map((sermon) => (
+              <Link
+                key={sermon.slug}
+                to="/messages/$slug"
+                params={{ slug: sermon.slug }}
+                className="group relative aspect-[16/10] w-56 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/25 transition-transform duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-1.5 hover:ring-2 hover:ring-white/70 sm:w-64"
+              >
+                <img
+                  src={sermon.coverFallback}
+                  alt={sermon.title}
+                  loading="eager"
+                  width={640}
+                  height={400}
+                  className="h-full w-full object-cover transition-transform duration-[900ms] ease-[var(--ease-out-expo)] group-hover:scale-105"
+                />
+                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent p-3">
+                  <span className="line-clamp-2 text-left text-xs font-semibold leading-tight text-white">
+                    {sermon.title}
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            {exclusive && (
               <Link
                 to="/messages/$slug"
-                params={{ slug: firstSlug }}
-                className="inline-flex items-center gap-3 rounded-full bg-primary px-7 py-4 text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:scale-[1.04]"
+                params={{ slug: exclusive.slug }}
+                className="inline-flex items-center gap-3 rounded-full bg-white px-7 py-4 text-sm font-semibold text-[color:var(--ember)] transition-transform duration-300 hover:scale-[1.04]"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
                   <path d="M8 5v14l11-7z" />
@@ -139,13 +130,67 @@ export function HeroMosaic({ sermons = [] }: { sermons?: Sermon[] }) {
             )}
             <Link
               to="/messages"
-              className="inline-flex items-center gap-3 rounded-full border border-border px-7 py-4 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex items-center gap-3 rounded-full border border-white/50 px-7 py-4 text-sm font-semibold text-white transition-colors hover:bg-white/10"
             >
               Browse the library
             </Link>
           </div>
+
+          <div className="mt-10 inline-flex items-center gap-3 rounded-2xl bg-white/95 px-5 py-3">
+            <span className="font-display text-2xl font-extrabold tracking-tight text-[color:var(--ember)]">
+              PEMG
+            </span>
+            <span aria-hidden="true" className="text-xl text-[color:var(--ember)]">
+              &raquo;
+            </span>
+          </div>
         </div>
+
+        {exclusive && (
+          <div className="lg:justify-self-end">
+            <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-white">
+              Exclusive message of the week
+            </p>
+            <Link
+              to="/messages/$slug"
+              params={{ slug: exclusive.slug }}
+              className="group mt-4 block overflow-hidden rounded-3xl bg-white/95 shadow-[var(--shadow-lift)] transition-transform duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-1.5"
+            >
+              <div className="relative aspect-video overflow-hidden">
+                <img
+                  src={exclusive.coverFallback}
+                  alt={exclusive.title}
+                  loading="eager"
+                  width={1280}
+                  height={720}
+                  className="h-full w-full object-cover transition-transform duration-[1200ms] ease-[var(--ease-out-expo)] group-hover:scale-105"
+                />
+                <span className="absolute inset-0 grid place-items-center">
+                  <span className="grid h-16 w-16 place-items-center rounded-full bg-white/90 text-[color:var(--ember)]">
+                    <svg viewBox="0 0 24 24" className="ml-1 h-6 w-6 fill-current" aria-hidden="true">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                </span>
+              </div>
+              <div className="p-5">
+                <p className="line-clamp-2 font-display text-base font-bold uppercase leading-tight text-neutral-900">
+                  {exclusive.title}
+                </p>
+                <p className="mt-2 text-xs text-neutral-600">
+                  {exclusive.series} &middot; {formatSermonDate(exclusive.date)} &middot; Watch now
+                </p>
+              </div>
+            </Link>
+          </div>
+        )}
       </div>
+
+      {/* fade into the dark page body */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background"
+      />
     </section>
   );
 }
