@@ -59,7 +59,7 @@ export function ArticleCard({ article }: { article: Article }) {
       </div>
       <div className="min-w-0 py-1">
         <p className="eyebrow">
-          {article.category} &middot; {article.readTime}
+          {article.source} &middot; {article.readTime}
         </p>
         <h3 className="mt-2 font-display text-lg font-bold leading-snug">{article.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{article.excerpt}</p>

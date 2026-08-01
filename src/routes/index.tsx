@@ -6,6 +6,7 @@ import { SermonCard, SermonThumb } from "@/components/sermon-card";
 import { HeroMosaic } from "@/components/hero-mosaic";
 import { ArticleCard } from "@/components/cards";
 import { Reveal } from "@/components/reveal";
+import { EventsSection } from "@/components/events-section";
 
 const DESCRIPTION =
   "Watch teaching series in full, catch the latest message and read articles that take the Word into everyday life.";
@@ -126,6 +127,9 @@ function Index() {
               All articles &rarr;
             </Link>
           </div>
+          <p className="mt-4 max-w-xl text-sm text-muted-foreground">
+            Daily readings from Rhapsody of Realities and healing teaching from Healing Streams.
+          </p>
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
             {articles.slice(0, 4).map((article, i) => (
               <Reveal key={article.slug} delay={i * 80}>
@@ -133,6 +137,23 @@ function Index() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
+        <div className="flex items-end justify-between gap-6">
+          <h2 className="display text-4xl sm:text-6xl">
+            Upcoming <span className="gold-text">events</span>
+          </h2>
+          <Link
+            to="/events"
+            className="shrink-0 text-sm font-semibold text-muted-foreground hover:text-primary"
+          >
+            All events &rarr;
+          </Link>
+        </div>
+        <div className="mt-10">
+          <EventsSection limit={3} />
         </div>
       </section>
     </>

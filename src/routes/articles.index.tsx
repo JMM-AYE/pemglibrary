@@ -5,7 +5,7 @@ import { ArticleCard } from "@/components/cards";
 import { Reveal } from "@/components/reveal";
 
 const DESCRIPTION =
-  "Short, practical writing on study, prayer, faith and growth — companions to the message library.";
+  "Daily devotional readings from Rhapsody of Realities and healing teaching from Healing Streams — companions to the message library.";
 
 export const Route = createFileRoute("/articles/")({
   head: () => ({
@@ -21,11 +21,11 @@ export const Route = createFileRoute("/articles/")({
 
 function ArticlesPage() {
   const categories = useMemo(
-    () => ["All", ...Array.from(new Set(articles.map((a) => a.category)))],
+    () => ["All", ...Array.from(new Set(articles.map((a) => a.source)))],
     [],
   );
   const [category, setCategory] = useState("All");
-  const filtered = articles.filter((a) => category === "All" || a.category === category);
+  const filtered = articles.filter((a) => category === "All" || a.source === category);
 
   return (
     <div className="mx-auto max-w-5xl px-5 pb-24 pt-36 sm:px-8">

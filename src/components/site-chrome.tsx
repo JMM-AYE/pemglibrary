@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/messages", label: "Messages" },
+  { to: "/events", label: "Events" },
   { to: "/articles", label: "Articles" },
 ];
 

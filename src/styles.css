@@ -68,6 +68,8 @@
   --color-gold-soft: var(--gold-soft);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-ember: var(--ember);
+  --color-ember-2: var(--ember-2);
 }
 
 :root {
@@ -110,6 +112,14 @@
   --sidebar-ring: oklch(0.704 0.04 256.788);
 
   --gradient-gold: linear-gradient(100deg, var(--gold-soft), var(--gold));
+  --ember: oklch(0.58 0.2 33);
+  --ember-2: oklch(0.75 0.18 62);
+  --gradient-ember: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--ember) 88%, black) 0%,
+    var(--ember) 42%,
+    var(--ember-2) 100%
+  );
   --gradient-veil: linear-gradient(
     180deg,
     color-mix(in oklab, var(--background) 10%, transparent) 0%,
