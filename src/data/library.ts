@@ -162,6 +162,10 @@ export type Article = {
   cover: string;
   excerpt: string;
   body: string[];
+  source: "Rhapsody of Realities" | "Healing Streams";
+  sourceUrl: string;
+  scripture?: string;
+  confession?: string;
 };
 
 export const articles: Article[] = [
