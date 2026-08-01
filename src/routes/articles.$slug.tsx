@@ -35,7 +35,8 @@ function ArticlePage() {
       </Link>
 
       <p className="eyebrow mt-8">
-        {article.category} &middot; {article.readTime} &middot; {formatDate(article.date)}
+        {article.source} &middot; {article.category} &middot; {article.readTime} &middot;{" "}
+        {formatDate(article.date)}
       </p>
       <h1 className="display mt-4 text-[clamp(2.25rem,6vw,4rem)]">{article.title}</h1>
 
@@ -49,10 +50,33 @@ function ArticlePage() {
       />
 
       <div className="mt-10 space-y-6 text-lg leading-relaxed text-muted-foreground">
+        {article.scripture && (
+          <p className="rounded-3xl border border-border bg-surface p-6 text-base italic text-foreground">
+            {article.scripture}
+          </p>
+        )}
         <p className="text-xl text-foreground">{article.excerpt}</p>
         {article.body.map((paragraph: string) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
+        {article.confession && (
+          <div className="rounded-3xl border border-border bg-surface p-6">
+            <p className="eyebrow">Confession</p>
+            <p className="mt-3 text-base text-foreground">{article.confession}</p>
+          </div>
+        )}
+        <p className="text-sm">
+          Adapted from{" "}
+          <a
+            href={article.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-primary hover:underline"
+          >
+            {article.source}
+          </a>
+          .
+        </p>
       </div>
 
       <section className="mt-20">
