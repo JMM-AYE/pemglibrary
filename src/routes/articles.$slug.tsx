@@ -1,28 +1,53 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { articles, formatDate } from "@/data/library";
+import { articles, formatDate, type Article } from "@/data/library";
 import { ArticleCard } from "@/components/cards";
+import { devotionalsQueryOptions, formatDevotionalDate } from "@/lib/devotionals";
+import type { Devotional } from "@/lib/rhapsody.server";
+
+type LoaderData =
+  | { kind: "article"; article: Article }
+  | { kind: "devotional"; devotional: Devotional; more: Devotional[] };
 
 export const Route = createFileRoute("/articles/$slug")({
-  loader: ({ params }) => {
+  loader: async ({ params, context }): Promise<LoaderData> => {
     const article = articles.find((a) => a.slug === params.slug);
-    if (!article) throw notFound();
-    return article;
+    if (article) return { kind: "article", article };
+
+    const devotionals = await context.queryClient.ensureQueryData(devotionalsQueryOptions);
+    const devotional = devotionals.find((d) => d.slug === params.slug);
+    if (!devotional) throw notFound();
+    return {
+      kind: "devotional",
+      devotional,
+      more: devotionals.filter((d) => d.slug !== devotional.slug).slice(0, 3),
+    };
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.title} — PEMG Library` },
-          { name: "description", content: loaderData.excerpt },
-          { property: "og:title", content: loaderData.title },
-          { property: "og:description", content: loaderData.excerpt },
-        ]
-      : [],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) return { meta: [] };
+    const title =
+      loaderData.kind === "article" ? loaderData.article.title : loaderData.devotional.title;
+    const description =
+      loaderData.kind === "article" ? loaderData.article.excerpt : loaderData.devotional.excerpt;
+    return {
+      meta: [
+        { title: `${title} — PEMG Library` },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+    };
+  },
   component: ArticlePage,
 });
 
 function ArticlePage() {
-  const article = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  if (data.kind === "devotional") {
+    return <DevotionalPage devotional={data.devotional} more={data.more} />;
+  }
+  const article = data.article;
   const more = articles.filter((a) => a.slug !== article.slug).slice(0, 2);
 
   return (
