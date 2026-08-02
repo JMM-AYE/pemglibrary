@@ -18,6 +18,7 @@ export const Route = createFileRoute("/articles/")({
       { property: "og:description", content: DESCRIPTION },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(devotionalsQueryOptions),
   component: ArticlesPage,
 });
 
