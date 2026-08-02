@@ -3,7 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { articles } from "@/data/library";
 import { formatSermonDate, sermonsQueryOptions } from "@/lib/sermons";
 import { SermonCard, SermonThumb } from "@/components/sermon-card";
-import { HeroMosaic } from "@/components/hero-mosaic";
+import { HeroStage } from "@/components/hero-stage";
 import { ArticleCard } from "@/components/cards";
 import { Reveal } from "@/components/reveal";
 import { EventsSection } from "@/components/events-section";
@@ -29,11 +29,11 @@ function Index() {
   const featured = data.sermons[0];
   const latest = data.sermons.slice(1, 7);
 
-  if (!featured) return <HeroMosaic sermons={data.sermons} />;
+  if (!featured) return <HeroStage sermons={data.sermons} />;
 
   return (
     <>
-      <HeroMosaic sermons={data.sermons} />
+      <HeroStage sermons={data.sermons} />
 
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
         <Reveal>
