@@ -237,6 +237,27 @@
   }
 }
 
+@utility card-lift-cool {
+  transition:
+    transform 0.6s var(--ease-out-expo),
+    box-shadow 0.6s var(--ease-out-expo),
+    border-color 0.4s ease;
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-ticket);
+    border-color: color-mix(in oklab, var(--sage) 55%, transparent);
+  }
+}
+
+@utility eyebrow-cool {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  color: var(--sage);
+}
+
 @utility reveal {
   opacity: 0;
   transform: translateY(28px);
