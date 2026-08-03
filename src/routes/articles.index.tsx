@@ -92,7 +92,7 @@ function ArticlesPage() {
 
       {showHealing && (
         <section className="mt-14">
-          <p className="eyebrow">Healing Streams &middot; teaching</p>
+          <p className="eyebrow-cool">Healing Streams &middot; teaching</p>
           <div className="mt-5 grid gap-5">
             {healing.map((article, i) => (
               <Reveal key={article.slug} delay={i * 70}>
