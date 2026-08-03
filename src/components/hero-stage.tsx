@@ -61,9 +61,9 @@ export function HeroStage({ sermons = [] }: { sermons?: Sermon[] }) {
 
   return (
     <section className="px-3 pt-24 sm:px-5 sm:pt-28">
-      <div className="relative isolate mx-auto grid w-full max-w-[100rem] overflow-hidden rounded-[2rem] sm:rounded-[2.75rem] lg:grid-cols-[1.55fr_1fr]">
+      <div className="relative isolate mx-auto grid w-full max-w-[100rem] overflow-hidden rounded-[1.75rem] sm:rounded-[2.75rem] lg:grid-cols-[1.55fr_1fr]">
         {/* ---------- ember stage ---------- */}
-        <div className="relative isolate min-h-[38rem] overflow-hidden lg:min-h-[44rem]">
+        <div className="relative isolate min-h-[32rem] overflow-hidden sm:min-h-[40rem] lg:min-h-[44rem]">
           <div
             aria-hidden="true"
             className="absolute inset-0 -z-20"
@@ -77,32 +77,32 @@ export function HeroStage({ sermons = [] }: { sermons?: Sermon[] }) {
             className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(75%_60%_at_62%_38%,color-mix(in_oklab,var(--ember-2)_60%,transparent)_0%,transparent_70%)]"
           />
 
-          {/* Pastor Enoch cutout */}
+          {/* Pastor Enoch cutout — sits low-right and never crowds the wordmark. */}
           <img
             src={pastorEnoch.url}
             alt="Pastor Enoch"
             loading="eager"
-            className="pointer-events-none absolute bottom-0 right-0 z-0 h-[72%] w-auto object-contain object-bottom drop-shadow-[0_40px_60px_rgba(0,0,0,0.45)] sm:h-[82%] lg:h-[88%] lg:right-[6%]"
+            className="pointer-events-none absolute bottom-0 right-[-14%] z-0 h-[56%] w-auto max-w-none object-contain object-bottom drop-shadow-[0_40px_60px_rgba(0,0,0,0.45)] xs:right-[-8%] sm:right-[-4%] sm:h-[70%] md:right-0 md:h-[80%] lg:right-[6%] lg:h-[88%]"
           />
 
-          <div className="relative z-10 flex h-full flex-col justify-between gap-10 p-7 sm:p-12">
+          <div className="relative z-10 flex h-full flex-col justify-between gap-8 p-6 sm:gap-10 sm:p-10 lg:p-12">
             <div>
-              <p className="font-display text-sm font-bold uppercase tracking-[0.3em] text-white/85">
+              <p className="font-display text-xs font-bold uppercase tracking-[0.3em] text-white/85 sm:text-sm">
                 PEMG <span className="text-white/55">Library</span>
               </p>
-              <h1 className="display mt-8 text-[clamp(3.5rem,11vw,9rem)] leading-[0.84] text-white drop-shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+              <h1 className="display mt-5 text-[clamp(3rem,14vw,9rem)] leading-[0.84] text-white drop-shadow-[0_18px_40px_rgba(0,0,0,0.35)] sm:mt-8 lg:text-[clamp(5rem,9vw,9rem)]">
                 Library
               </h1>
-              <p className="mt-6 max-w-xs text-sm leading-relaxed text-white/85 sm:text-base">
+              <p className="mt-5 max-w-[16rem] text-sm leading-relaxed text-white/85 sm:mt-6 sm:max-w-xs sm:text-base">
                 Messages that build faith.
                 <br />
                 The Word, on demand.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-8">
                 <Link
                   to="/messages"
-                  className="group inline-flex items-center gap-3 rounded-full bg-white px-7 py-4 text-xs font-bold uppercase tracking-[0.16em] text-[color:var(--ember)] transition-transform duration-300 hover:scale-[1.04]"
+                  className="group inline-flex items-center gap-3 rounded-full bg-white px-5 py-3.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[color:var(--ember)] transition-transform duration-300 hover:scale-[1.04] sm:px-7 sm:py-4 sm:text-xs"
                 >
                   Watch messages
                   <span
@@ -114,14 +114,14 @@ export function HeroStage({ sermons = [] }: { sermons?: Sermon[] }) {
                 </Link>
                 <Link
                   to="/articles"
-                  className="inline-flex items-center rounded-full border border-white/50 px-7 py-4 text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/10"
+                  className="inline-flex items-center rounded-full border border-white/50 px-5 py-3.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/10 sm:px-7 sm:py-4 sm:text-xs"
                 >
                   Daily devotional
                 </Link>
               </div>
             </div>
 
-            <div className="max-w-xs">
+            <div className="max-w-xs rounded-2xl bg-black/15 p-3 backdrop-blur-[2px] sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-3">
                   {upNext.map((sermon) => (
