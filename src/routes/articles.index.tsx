@@ -33,7 +33,7 @@ function ArticlesPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 pb-24 pt-36 sm:px-8">
-      <p className="eyebrow">The journal</p>
+      <p className="eyebrow-cool">The journal</p>
       <h1 className="display mt-4 text-[clamp(2.75rem,8vw,6rem)]">Articles</h1>
       <p className="mt-5 max-w-xl text-muted-foreground">{DESCRIPTION}</p>
 
@@ -44,7 +44,7 @@ function ArticlesPage() {
             type="button"
             onClick={() => setCategory(name)}
             data-active={category === name}
-            className="rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground data-[active=true]:border-primary data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+            className="rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground data-[active=true]:border-transparent data-[active=true]:bg-[color:var(--sage)] data-[active=true]:text-[color:var(--ink)]"
           >
             {name}
           </button>
@@ -53,14 +53,14 @@ function ArticlesPage() {
 
       {showRhapsody && devotionals.length > 0 && (
         <section className="mt-10">
-          <p className="eyebrow">Rhapsody of Realities &middot; daily devotional</p>
+          <p className="eyebrow-cool">Rhapsody of Realities &middot; daily devotional</p>
           <div className="mt-5 grid gap-5">
             {devotionals.map((devotional, i) => (
               <Reveal key={devotional.slug} delay={i * 60}>
                 <Link
                   to="/articles/$slug"
                   params={{ slug: devotional.slug }}
-                  className="card-lift group flex gap-5 rounded-3xl border border-border bg-surface p-4"
+                  className="card-lift-cool group flex gap-5 rounded-3xl border border-[color:color-mix(in_oklab,var(--sage)_18%,transparent)] bg-[color:color-mix(in_oklab,var(--ink)_88%,var(--background))] p-4"
                 >
                   {devotional.cover && (
                     <div className="hidden h-28 w-36 shrink-0 overflow-hidden rounded-2xl sm:block">
@@ -73,7 +73,7 @@ function ArticlesPage() {
                     </div>
                   )}
                   <div className="min-w-0 py-1">
-                    <p className="eyebrow">
+                    <p className="eyebrow-cool">
                       Rhapsody of Realities &middot; {formatDevotionalDate(devotional.date)}
                     </p>
                     <h3 className="mt-2 font-display text-lg font-bold uppercase leading-snug">
@@ -92,7 +92,7 @@ function ArticlesPage() {
 
       {showHealing && (
         <section className="mt-14">
-          <p className="eyebrow">Healing Streams &middot; teaching</p>
+          <p className="eyebrow-cool">Healing Streams &middot; teaching</p>
           <div className="mt-5 grid gap-5">
             {healing.map((article, i) => (
               <Reveal key={article.slug} delay={i * 70}>

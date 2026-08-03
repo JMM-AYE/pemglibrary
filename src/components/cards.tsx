@@ -45,7 +45,7 @@ export function ArticleCard({ article }: { article: Article }) {
     <Link
       to="/articles/$slug"
       params={{ slug: article.slug }}
-      className="card-lift group flex gap-5 rounded-3xl border border-border bg-surface p-4"
+      className="card-lift-cool group flex gap-5 rounded-3xl border border-[color:color-mix(in_oklab,var(--sage)_18%,transparent)] bg-[color:color-mix(in_oklab,var(--ink)_88%,var(--background))] p-4"
     >
       <div className="hidden h-28 w-36 shrink-0 overflow-hidden rounded-2xl sm:block">
         <img
@@ -58,7 +58,7 @@ export function ArticleCard({ article }: { article: Article }) {
         />
       </div>
       <div className="min-w-0 py-1">
-        <p className="eyebrow">
+        <p className="eyebrow-cool">
           {article.source} &middot; {article.readTime}
         </p>
         <h3 className="mt-2 font-display text-lg font-bold leading-snug">{article.title}</h3>

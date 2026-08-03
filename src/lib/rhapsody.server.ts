@@ -80,16 +80,60 @@ async function fetchOne(date: string, token: string): Promise<Devotional | null>
   };
 }
 
-/** Today's devotional plus the previous `days - 1` readings. */
+/* ---------------------------------------------------------------- caching */
+
+/** Per-day devotionals never change once published, so cache them for good. */
+const dayCache = new Map<string, Devotional>();
+
+type Cached = { at: number; value: Devotional[] };
+let listCache: Cached | null = null;
+let inFlight: Promise<Devotional[]> | null = null;
+
+const LIST_TTL_MS = 1000 * 60 * 60 * 6;
+const TOKEN_TTL_MS = 1000 * 60 * 20;
+
+let tokenCache: { at: number; value: string } | null = null;
+
+async function getToken(): Promise<string | null> {
+  if (tokenCache && Date.now() - tokenCache.at < TOKEN_TTL_MS) return tokenCache.value;
+  const token = await fetchToken();
+  if (token) tokenCache = { at: Date.now(), value: token };
+  return token;
+}
+
+async function loadDevotionals(days: number): Promise<Devotional[]> {
+  const token = await getToken();
+  if (!token) return [];
+  const results = await Promise.all(
+    Array.from({ length: days }, (_, i) => {
+      const date = isoDate(i);
+      const hit = dayCache.get(date);
+      if (hit) return Promise.resolve(hit);
+      return fetchOne(date, token)
+        .then((entry) => {
+          if (entry) dayCache.set(date, entry);
+          return entry;
+        })
+        .catch(() => null);
+    }),
+  );
+  return results.filter((d): d is Devotional => d !== null);
+}
+
+/** Today's devotional plus the previous `days - 1` readings, cached per day. */
 export async function fetchDevotionals(days = 7): Promise<Devotional[]> {
-  try {
-    const token = await fetchToken();
-    if (!token) return [];
-    const results = await Promise.all(
-      Array.from({ length: days }, (_, i) => fetchOne(isoDate(i), token).catch(() => null)),
-    );
-    return results.filter((d): d is Devotional => d !== null);
-  } catch {
-    return [];
-  }
+  if (listCache && Date.now() - listCache.at < LIST_TTL_MS) return listCache.value;
+  if (inFlight) return inFlight;
+
+  inFlight = loadDevotionals(days)
+    .then((value) => {
+      if (value.length) listCache = { at: Date.now(), value };
+      return value.length ? value : (listCache?.value ?? []);
+    })
+    .catch(() => listCache?.value ?? [])
+    .finally(() => {
+      inFlight = null;
+    });
+
+  return inFlight;
 }

@@ -103,6 +103,12 @@ export function SiteFooter() {
           <Link to="/articles" className="hover:text-foreground">
             Articles
           </Link>
+          <Link to="/events" className="hover:text-foreground">
+            Events
+          </Link>
+          <Link to="/admin" className="hover:text-foreground">
+            Admin
+          </Link>
         </div>
       </div>
       <div className="border-t border-border py-5 text-center text-xs text-muted-foreground">
