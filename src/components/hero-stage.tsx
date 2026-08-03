@@ -82,7 +82,7 @@ export function HeroStage({ sermons = [] }: { sermons?: Sermon[] }) {
             src={pastorEnoch.url}
             alt="Pastor Enoch"
             loading="eager"
-            className="pointer-events-none absolute bottom-0 right-[-14%] z-0 h-[56%] w-auto max-w-none object-contain object-bottom drop-shadow-[0_40px_60px_rgba(0,0,0,0.45)] xs:right-[-8%] sm:right-[-4%] sm:h-[70%] md:right-0 md:h-[80%] lg:right-[6%] lg:h-[88%]"
+            className="pointer-events-none absolute bottom-0 right-[-14%] z-0 h-[56%] w-auto max-w-none object-contain object-bottom drop-shadow-[0_40px_60px_rgba(0,0,0,0.45)] sm:right-[-4%] sm:h-[70%] md:right-0 md:h-[80%] lg:right-[6%] lg:h-[88%]"
           />
 
           <div className="relative z-10 flex h-full flex-col justify-between gap-8 p-6 sm:gap-10 sm:p-10 lg:p-12">
@@ -146,7 +146,7 @@ export function HeroStage({ sermons = [] }: { sermons?: Sermon[] }) {
         </div>
 
         {/* ---------- light rail ---------- */}
-        <div className="flex flex-col justify-between gap-8 bg-[oklch(0.97_0.006_80)] p-7 text-neutral-900 sm:p-10">
+        <div className="flex flex-col justify-between gap-8 bg-[color:var(--parchment)] p-6 text-[color:var(--ink)] sm:p-10">
           <div>
             <p className="flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.24em] text-[color:var(--ember)]">
               Now streaming
