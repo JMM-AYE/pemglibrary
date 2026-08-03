@@ -79,14 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PEMG Library — Pastor Enoch Message Group" },
+      { title: "PEMG Library — Messages & Articles" },
       {
         name: "description",
         content:
           "Stream teachings, watch message series and read articles from the digital library.",
       },
       { name: "author", content: "PEMG Library — Pastor Enoch Message Group" },
-      { property: "og:title", content: "PEMG Library — Pastor Enoch Message Group" },
+      { property: "og:title", content: "PEMG Library — Messages & Articles" },
       {
         property: "og:description",
         content:
@@ -95,6 +95,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "PEMG Library — Messages & Articles" },
+      { name: "twitter:description", content: "Stream teachings, watch message series and read articles from the digital library." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3b3fad50-47e1-43b3-b945-7670545e3688/id-preview-1436b901--5859e430-222b-4a43-b114-e60e7c6ddec1.lovable.app-1785717794118.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3b3fad50-47e1-43b3-b945-7670545e3688/id-preview-1436b901--5859e430-222b-4a43-b114-e60e7c6ddec1.lovable.app-1785717794118.png" },
     ],
     links: [
       {
@@ -107,7 +111,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Manrope:wght@300;400;500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
