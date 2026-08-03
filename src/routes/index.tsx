@@ -114,11 +114,11 @@ function Index() {
         </div>
       </section>
 
-      <section className="border-t border-border bg-surface/40">
+      <section className="border-t border-border bg-[color:color-mix(in_oklab,var(--sage)_7%,var(--background))]">
         <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
           <div className="flex items-end justify-between gap-6">
             <h2 className="display text-4xl sm:text-6xl">
-              From the <span className="gold-text">journal</span>
+              From the <span className="text-[color:var(--sage)]">journal</span>
             </h2>
             <Link
               to="/articles"
@@ -143,7 +143,7 @@ function Index() {
       <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
         <div className="flex items-end justify-between gap-6">
           <h2 className="display text-4xl sm:text-6xl">
-            Upcoming <span className="gold-text">events</span>
+            Upcoming <span className="text-[color:var(--sage)]">events</span>
           </h2>
           <Link
             to="/events"
