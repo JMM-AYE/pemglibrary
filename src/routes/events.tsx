@@ -21,7 +21,7 @@ export const Route = createFileRoute("/events")({
 function EventsPage() {
   return (
     <div className="mx-auto max-w-5xl px-5 pb-24 pt-36 sm:px-8">
-      <p className="eyebrow">What's ahead</p>
+      <p className="eyebrow-cool">What's ahead</p>
       <h1 className="display mt-4 text-[clamp(2.75rem,8vw,6rem)]">Upcoming events</h1>
       <p className="mt-5 max-w-xl text-muted-foreground">{DESCRIPTION}</p>
       <div className="mt-12">
