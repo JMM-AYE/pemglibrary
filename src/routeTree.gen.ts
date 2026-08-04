@@ -17,6 +17,7 @@ import { Route as MessagesIndexRouteImport } from './routes/messages.index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as ArticlesIndexRouteImport } from './routes/articles.index'
 import { Route as MessagesSlugRouteImport } from './routes/messages.$slug'
+import { Route as EventsSlugRouteImport } from './routes/events.$slug'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -59,6 +60,11 @@ const MessagesSlugRoute = MessagesSlugRouteImport.update({
   path: '/messages/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsSlugRoute = EventsSlugRouteImport.update({
+  id: '/events/$slug',
+  path: '/events/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   id: '/articles/$slug',
   path: '/articles/$slug',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles/': typeof ArticlesIndexRoute
   '/events/': typeof EventsIndexRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles': typeof ArticlesIndexRoute
   '/events': typeof EventsIndexRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles/': typeof ArticlesIndexRoute
   '/events/': typeof EventsIndexRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sitemap.xml'
     | '/articles/$slug'
+    | '/events/$slug'
     | '/messages/$slug'
     | '/articles/'
     | '/events/'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sitemap.xml'
     | '/articles/$slug'
+    | '/events/$slug'
     | '/messages/$slug'
     | '/articles'
     | '/events'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sitemap.xml'
     | '/articles/$slug'
+    | '/events/$slug'
     | '/messages/$slug'
     | '/articles/'
     | '/events/'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ArticlesSlugRoute: typeof ArticlesSlugRoute
+  EventsSlugRoute: typeof EventsSlugRoute
   MessagesSlugRoute: typeof MessagesSlugRoute
   ArticlesIndexRoute: typeof ArticlesIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$slug': {
+      id: '/events/$slug'
+      path: '/events/$slug'
+      fullPath: '/events/$slug'
+      preLoaderRoute: typeof EventsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/articles/$slug': {
       id: '/articles/$slug'
       path: '/articles/$slug'
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ArticlesSlugRoute: ArticlesSlugRoute,
+  EventsSlugRoute: EventsSlugRoute,
   MessagesSlugRoute: MessagesSlugRoute,
   ArticlesIndexRoute: ArticlesIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
