@@ -4,7 +4,7 @@ import { EventsSection } from "@/components/events-section";
 const DESCRIPTION =
   "Upcoming PEMG gatherings, live healing services, partner prayer meetings and conferences — with dates, times and how to join.";
 
-export const Route = createFileRoute("/events")({
+export const Route = createFileRoute("/events/")({
   head: () => ({
     meta: [
       { title: "Upcoming Events — PEMG Library" },
