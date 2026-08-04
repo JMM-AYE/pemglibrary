@@ -30,6 +30,20 @@ export const getPublicEvents = createServerFn({ method: "GET" }).handler(async (
   return data ?? [];
 });
 
+/** A single published event by slug — public detail page. */
+export const getPublicEvent = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) => z.object({ slug: z.string().min(1).max(120) }).parse(data))
+  .handler(async ({ data }) => {
+    const supabase = createPublicClient();
+    const { data: event } = await supabase
+      .from("events")
+      .select(COLUMNS)
+      .eq("published", true)
+      .eq("slug", data.slug)
+      .maybeSingle();
+    return event;
+  });
+
 async function assertAdmin(context: { supabase: ReturnType<typeof createPublicClient>; userId: string }) {
   const { data } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,

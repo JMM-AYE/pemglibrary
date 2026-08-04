@@ -62,6 +62,45 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          attendee_type: Database["public"]["Enums"]["attendee_type"]
+          cell_group: string
+          country: string
+          country_code: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          attendee_type?: Database["public"]["Enums"]["attendee_type"]
+          cell_group?: string
+          country?: string
+          country_code?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id: string
+          phone?: string
+          updated_at?: string
+        }
+        Update: {
+          attendee_type?: Database["public"]["Enums"]["attendee_type"]
+          cell_group?: string
+          country?: string
+          country_code?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -98,6 +137,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      attendee_type: "member" | "guest"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -226,6 +266,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      attendee_type: ["member", "guest"],
     },
   },
 } as const

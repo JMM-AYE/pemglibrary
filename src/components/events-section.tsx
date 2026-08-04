@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Reveal } from "@/components/reveal";
 import {
   eventDay,
@@ -63,7 +64,13 @@ export function EventsSection({ limit }: { limit?: number }) {
                 {event.kind}
               </p>
               <h3 className="mt-2 font-display text-xl font-extrabold uppercase leading-[1.05] tracking-tight sm:text-3xl">
-                {event.title}
+                <Link
+                  to="/events/$slug"
+                  params={{ slug: event.slug }}
+                  className="after:absolute after:inset-0 hover:text-[color:var(--sage-deep)]"
+                >
+                  {event.title}
+                </Link>
               </h3>
               {event.summary && (
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-[color:var(--ink)]/70">
@@ -76,17 +83,14 @@ export function EventsSection({ limit }: { limit?: number }) {
               </p>
             </div>
 
-            {event.href && (
-              <a
-                href={event.href}
-                target="_blank"
-                rel="noreferrer"
-                className="relative col-span-2 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[color:var(--ink)] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-[color:var(--parchment)] transition-transform duration-300 hover:scale-[1.04] sm:col-span-1 sm:px-7 sm:py-4"
-              >
-                {event.cta}
-                <span aria-hidden="true">&#8599;</span>
-              </a>
-            )}
+            <Link
+              to="/events/$slug"
+              params={{ slug: event.slug }}
+              className="relative z-10 col-span-2 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[color:var(--ink)] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-[color:var(--parchment)] transition-transform duration-300 hover:scale-[1.04] sm:col-span-1 sm:px-7 sm:py-4"
+            >
+              {event.cta}
+              <span aria-hidden="true">&#8594;</span>
+            </Link>
           </article>
         </Reveal>
       ))}

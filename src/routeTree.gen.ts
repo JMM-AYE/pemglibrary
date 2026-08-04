@@ -10,23 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as EventsRouteImport } from './routes/events'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MessagesIndexRouteImport } from './routes/messages.index'
+import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as ArticlesIndexRouteImport } from './routes/articles.index'
 import { Route as MessagesSlugRouteImport } from './routes/messages.$slug'
+import { Route as EventsSlugRouteImport } from './routes/events.$slug'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventsRoute = EventsRouteImport.update({
-  id: '/events',
-  path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -39,6 +36,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -47,6 +49,11 @@ const IndexRoute = IndexRouteImport.update({
 const MessagesIndexRoute = MessagesIndexRouteImport.update({
   id: '/messages/',
   path: '/messages/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArticlesIndexRoute = ArticlesIndexRouteImport.update({
@@ -59,6 +66,11 @@ const MessagesSlugRoute = MessagesSlugRouteImport.update({
   path: '/messages/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsSlugRoute = EventsSlugRouteImport.update({
+  id: '/events/$slug',
+  path: '/events/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   id: '/articles/$slug',
   path: '/articles/$slug',
@@ -67,83 +79,97 @@ const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/events': typeof EventsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles/': typeof ArticlesIndexRoute
+  '/events/': typeof EventsIndexRoute
   '/messages/': typeof MessagesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/events': typeof EventsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles': typeof ArticlesIndexRoute
+  '/events': typeof EventsIndexRoute
   '/messages': typeof MessagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/events': typeof EventsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles/': typeof ArticlesIndexRoute
+  '/events/': typeof EventsIndexRoute
   '/messages/': typeof MessagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/admin'
     | '/auth'
-    | '/events'
     | '/sitemap.xml'
     | '/articles/$slug'
+    | '/events/$slug'
     | '/messages/$slug'
     | '/articles/'
+    | '/events/'
     | '/messages/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/admin'
     | '/auth'
-    | '/events'
     | '/sitemap.xml'
     | '/articles/$slug'
+    | '/events/$slug'
     | '/messages/$slug'
     | '/articles'
+    | '/events'
     | '/messages'
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/admin'
     | '/auth'
-    | '/events'
     | '/sitemap.xml'
     | '/articles/$slug'
+    | '/events/$slug'
     | '/messages/$slug'
     | '/articles/'
+    | '/events/'
     | '/messages/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
-  EventsRoute: typeof EventsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ArticlesSlugRoute: typeof ArticlesSlugRoute
+  EventsSlugRoute: typeof EventsSlugRoute
   MessagesSlugRoute: typeof MessagesSlugRoute
   ArticlesIndexRoute: typeof ArticlesIndexRoute
+  EventsIndexRoute: typeof EventsIndexRoute
   MessagesIndexRoute: typeof MessagesIndexRoute
 }
 
@@ -154,13 +180,6 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/events': {
-      id: '/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -177,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -189,6 +215,13 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/messages/'
       preLoaderRoute: typeof MessagesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/articles/': {
@@ -205,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$slug': {
+      id: '/events/$slug'
+      path: '/events/$slug'
+      fullPath: '/events/$slug'
+      preLoaderRoute: typeof EventsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/articles/$slug': {
       id: '/articles/$slug'
       path: '/articles/$slug'
@@ -217,13 +257,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
-  EventsRoute: EventsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ArticlesSlugRoute: ArticlesSlugRoute,
+  EventsSlugRoute: EventsSlugRoute,
   MessagesSlugRoute: MessagesSlugRoute,
   ArticlesIndexRoute: ArticlesIndexRoute,
+  EventsIndexRoute: EventsIndexRoute,
   MessagesIndexRoute: MessagesIndexRoute,
 }
 export const routeTree = rootRouteImport

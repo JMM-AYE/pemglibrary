@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { SermonCard } from "@/components/sermon-card";
 import { YouTubePlayer } from "@/components/youtube-player";
+import { WatchGate } from "@/components/watch-gate";
 import { formatSermonDate, sermonsQueryOptions } from "@/lib/sermons";
 
 export const Route = createFileRoute("/messages/$slug")({
@@ -43,7 +44,9 @@ function MessagePage() {
       </Link>
 
       <div className="mt-8">
-        <YouTubePlayer sermon={sermon} />
+        <WatchGate poster={sermon.cover}>
+          <YouTubePlayer sermon={sermon} />
+        </WatchGate>
       </div>
 
       <div className="mt-10 grid gap-12 lg:grid-cols-[1.6fr_1fr]">

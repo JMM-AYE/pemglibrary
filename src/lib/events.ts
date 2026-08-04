@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getAllEvents, getPublicEvents } from "./events.functions";
+import { getAllEvents, getPublicEvent, getPublicEvents } from "./events.functions";
 
 export type LibraryEvent = {
   id: string;
@@ -26,6 +26,13 @@ export const adminEventsQueryOptions = queryOptions({
   queryFn: () => getAllEvents(),
   staleTime: 0,
 });
+
+export const eventQueryOptions = (slug: string) =>
+  queryOptions({
+    queryKey: ["events", "detail", slug],
+    queryFn: () => getPublicEvent({ data: { slug } }),
+    staleTime: 1000 * 60 * 5,
+  });
 
 export function formatEventDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {

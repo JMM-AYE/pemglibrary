@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useSession } from "@/hooks/use-session";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -11,6 +12,7 @@ const nav = [
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { status } = useSession();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -45,12 +47,22 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/messages"
-            className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:scale-[1.04] sm:inline-flex"
-          >
-            Start watching
-          </Link>
+          {status === "in" ? (
+            <Link
+              to="/account"
+              className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:scale-[1.04] sm:inline-flex"
+            >
+              My account
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              search={{ mode: "signin" }}
+              className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:scale-[1.04] sm:inline-flex"
+            >
+              Sign in to watch
+            </Link>
+          )}
           <button
             type="button"
             aria-label="Toggle menu"
@@ -76,6 +88,13 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              to={status === "in" ? "/account" : "/auth"}
+              onClick={() => setOpen(false)}
+              className="py-1 text-base font-semibold text-foreground"
+            >
+              {status === "in" ? "My account" : "Sign in to watch"}
+            </Link>
           </div>
         </div>
       )}
