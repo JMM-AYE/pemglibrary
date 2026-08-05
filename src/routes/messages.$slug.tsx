@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { SermonCard } from "@/components/sermon-card";
 import { YouTubePlayer } from "@/components/youtube-player";
 import { WatchGate } from "@/components/watch-gate";
+import { ReminderButton } from "@/components/reminder-button";
 import { formatSermonDate, sermonsQueryOptions } from "@/lib/sermons";
 
 export const Route = createFileRoute("/messages/$slug")({
@@ -72,14 +73,15 @@ function MessagePage() {
               </div>
             ))}
           </dl>
-          <a
-            href={sermon.url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-semibold hover:border-primary"
-          >
-            Watch on YouTube
-          </a>
+          <ReminderButton
+            className="mt-6 w-full"
+            kind="video"
+            targetId={sermon.slug}
+            title={sermon.title}
+            href={`/messages/${sermon.slug}`}
+            posterUrl={sermon.cover}
+            labels={{ on: "Saved to watch later", off: "Watch later" }}
+          />
         </aside>
       </div>
 

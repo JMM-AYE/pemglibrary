@@ -15,9 +15,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MessagesIndexRouteImport } from './routes/messages.index'
+import { Route as LiveIndexRouteImport } from './routes/live.index'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as ArticlesIndexRouteImport } from './routes/articles.index'
 import { Route as MessagesSlugRouteImport } from './routes/messages.$slug'
+import { Route as LiveSlugRouteImport } from './routes/live.$slug'
 import { Route as EventsSlugRouteImport } from './routes/events.$slug'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 
@@ -51,6 +53,11 @@ const MessagesIndexRoute = MessagesIndexRouteImport.update({
   path: '/messages/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LiveIndexRoute = LiveIndexRouteImport.update({
+  id: '/live/',
+  path: '/live/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
@@ -64,6 +71,11 @@ const ArticlesIndexRoute = ArticlesIndexRouteImport.update({
 const MessagesSlugRoute = MessagesSlugRouteImport.update({
   id: '/messages/$slug',
   path: '/messages/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveSlugRoute = LiveSlugRouteImport.update({
+  id: '/live/$slug',
+  path: '/live/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsSlugRoute = EventsSlugRouteImport.update({
@@ -85,9 +97,11 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/events/$slug': typeof EventsSlugRoute
+  '/live/$slug': typeof LiveSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles/': typeof ArticlesIndexRoute
   '/events/': typeof EventsIndexRoute
+  '/live/': typeof LiveIndexRoute
   '/messages/': typeof MessagesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -98,9 +112,11 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/events/$slug': typeof EventsSlugRoute
+  '/live/$slug': typeof LiveSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles': typeof ArticlesIndexRoute
   '/events': typeof EventsIndexRoute
+  '/live': typeof LiveIndexRoute
   '/messages': typeof MessagesIndexRoute
 }
 export interface FileRoutesById {
@@ -112,9 +128,11 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/events/$slug': typeof EventsSlugRoute
+  '/live/$slug': typeof LiveSlugRoute
   '/messages/$slug': typeof MessagesSlugRoute
   '/articles/': typeof ArticlesIndexRoute
   '/events/': typeof EventsIndexRoute
+  '/live/': typeof LiveIndexRoute
   '/messages/': typeof MessagesIndexRoute
 }
 export interface FileRouteTypes {
@@ -127,9 +145,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/articles/$slug'
     | '/events/$slug'
+    | '/live/$slug'
     | '/messages/$slug'
     | '/articles/'
     | '/events/'
+    | '/live/'
     | '/messages/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -140,9 +160,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/articles/$slug'
     | '/events/$slug'
+    | '/live/$slug'
     | '/messages/$slug'
     | '/articles'
     | '/events'
+    | '/live'
     | '/messages'
   id:
     | '__root__'
@@ -153,9 +175,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/articles/$slug'
     | '/events/$slug'
+    | '/live/$slug'
     | '/messages/$slug'
     | '/articles/'
     | '/events/'
+    | '/live/'
     | '/messages/'
   fileRoutesById: FileRoutesById
 }
@@ -167,9 +191,11 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ArticlesSlugRoute: typeof ArticlesSlugRoute
   EventsSlugRoute: typeof EventsSlugRoute
+  LiveSlugRoute: typeof LiveSlugRoute
   MessagesSlugRoute: typeof MessagesSlugRoute
   ArticlesIndexRoute: typeof ArticlesIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
+  LiveIndexRoute: typeof LiveIndexRoute
   MessagesIndexRoute: typeof MessagesIndexRoute
 }
 
@@ -217,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/live/': {
+      id: '/live/'
+      path: '/live'
+      fullPath: '/live/'
+      preLoaderRoute: typeof LiveIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/': {
       id: '/events/'
       path: '/events'
@@ -236,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/messages/$slug'
       fullPath: '/messages/$slug'
       preLoaderRoute: typeof MessagesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live/$slug': {
+      id: '/live/$slug'
+      path: '/live/$slug'
+      fullPath: '/live/$slug'
+      preLoaderRoute: typeof LiveSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events/$slug': {
@@ -263,9 +303,11 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ArticlesSlugRoute: ArticlesSlugRoute,
   EventsSlugRoute: EventsSlugRoute,
+  LiveSlugRoute: LiveSlugRoute,
   MessagesSlugRoute: MessagesSlugRoute,
   ArticlesIndexRoute: ArticlesIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
+  LiveIndexRoute: LiveIndexRoute,
   MessagesIndexRoute: MessagesIndexRoute,
 }
 export const routeTree = rootRouteImport
