@@ -62,6 +62,113 @@ export type Database = {
         }
         Relationships: []
       }
+      live_stream_sources: {
+        Row: {
+          access_code: string | null
+          created_at: string
+          source_type: Database["public"]["Enums"]["stream_source"]
+          source_value: string
+          stream_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_code?: string | null
+          created_at?: string
+          source_type?: Database["public"]["Enums"]["stream_source"]
+          source_value?: string
+          stream_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_code?: string | null
+          created_at?: string
+          source_type?: Database["public"]["Enums"]["stream_source"]
+          source_value?: string
+          stream_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_stream_sources_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: true
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_streams: {
+        Row: {
+          created_at: string
+          id: string
+          poster_url: string | null
+          published: boolean
+          slug: string
+          starts_at: string
+          status: Database["public"]["Enums"]["stream_status"]
+          summary: string
+          title: string
+          updated_at: string
+          visibility: Database["public"]["Enums"]["stream_visibility"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          poster_url?: string | null
+          published?: boolean
+          slug: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["stream_status"]
+          summary?: string
+          title: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["stream_visibility"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          poster_url?: string | null
+          published?: boolean
+          slug?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["stream_status"]
+          summary?: string
+          title?: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["stream_visibility"]
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          href: string
+          id: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          href?: string
+          id?: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          href?: string
+          id?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           attendee_type: Database["public"]["Enums"]["attendee_type"]
@@ -98,6 +205,48 @@ export type Database = {
           id?: string
           phone?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      reminders: {
+        Row: {
+          created_at: string
+          href: string
+          id: string
+          kind: string
+          notified_at: string | null
+          poster_url: string | null
+          remind_at: string | null
+          target_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          href?: string
+          id?: string
+          kind: string
+          notified_at?: string | null
+          poster_url?: string | null
+          remind_at?: string | null
+          target_id: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          href?: string
+          id?: string
+          kind?: string
+          notified_at?: string | null
+          poster_url?: string | null
+          remind_at?: string | null
+          target_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -138,6 +287,9 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       attendee_type: "member" | "guest"
+      stream_source: "youtube" | "hls"
+      stream_status: "scheduled" | "live" | "ended"
+      stream_visibility: "public" | "code"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -267,6 +419,9 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       attendee_type: ["member", "guest"],
+      stream_source: ["youtube", "hls"],
+      stream_status: ["scheduled", "live", "ended"],
+      stream_visibility: ["public", "code"],
     },
   },
 } as const

@@ -1,10 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useSession } from "@/hooks/use-session";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+import { NotificationBell } from "@/components/notification-bell";
 
 const nav = [
   { to: "/", label: "Home" },
   { to: "/messages", label: "Messages" },
+  { to: "/live", label: "Live" },
   { to: "/events", label: "Events" },
   { to: "/articles", label: "Articles" },
 ];
@@ -47,6 +50,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <NotificationBell />
           {status === "in" ? (
             <Link
               to="/account"
@@ -103,6 +107,7 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const { isAdmin } = useIsAdmin();
   return (
     <footer className="border-t border-border">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-12 sm:flex-row sm:items-end sm:justify-between sm:px-8">
@@ -125,9 +130,11 @@ export function SiteFooter() {
           <Link to="/events" className="hover:text-foreground">
             Events
           </Link>
-          <Link to="/admin" className="hover:text-foreground">
-            Admin
-          </Link>
+          {isAdmin && (
+            <Link to="/admin" className="hover:text-foreground">
+              Admin
+            </Link>
+          )}
         </div>
       </div>
       <div className="border-t border-border py-5 text-center text-xs text-muted-foreground">

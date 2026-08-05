@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminStreams } from "@/components/admin-streams";
 import { deleteEvent, getAllEvents, getIsAdmin, saveEvent } from "@/lib/events.functions";
 import { formatEventDate, formatEventTime, type LibraryEvent } from "@/lib/events";
 
@@ -289,6 +290,8 @@ function AdminPage() {
           </article>
         ))}
       </div>
+
+      <AdminStreams />
     </div>
   );
 }

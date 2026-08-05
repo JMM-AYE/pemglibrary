@@ -11,4 +11,4 @@ export type Sermon = {
   url: string;
 };
 
-export const PEMG_CHANNEL_ID = "UCrQeaCXWuaUa3pgAjvdUqnw";
+export const PEMG_CHANNEL_ID = "UCJAxUPzVhDs8nYrsXmSTKNg";
