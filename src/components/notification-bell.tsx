@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useSession } from "@/hooks/use-session";
@@ -57,14 +56,14 @@ export function NotificationBell() {
             <ul className="max-h-80 overflow-y-auto">
               {items.map((n) => (
                 <li key={n.id} className="border-b border-border/60 last:border-0">
-                  <Link
-                    to={n.href || "/live"}
+                  <a
+                    href={n.href || "/live"}
                     onClick={() => setOpen(false)}
                     className="block px-4 py-3 transition-colors hover:bg-surface"
                   >
                     <p className="text-sm font-semibold">{n.title}</p>
                     {n.body && <p className="mt-1 text-xs text-muted-foreground">{n.body}</p>}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
