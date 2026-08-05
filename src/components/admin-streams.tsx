@@ -1,0 +1,273 @@
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { deleteStream, getAllStreams, saveStream } from "@/lib/live.functions";
+import { formatStreamStart, STATUS_LABEL, type AdminStream } from "@/lib/live";
+
+type Draft = Omit<AdminStream, "id"> & { id?: string };
+
+const emptyDraft = (): Draft => ({
+  slug: "",
+  title: "",
+  summary: "",
+  status: "scheduled",
+  visibility: "public",
+  starts_at: new Date().toISOString().slice(0, 16),
+  poster_url: null,
+  published: true,
+  source_type: "youtube",
+  source_value: "",
+  access_code: "",
+});
+
+function slugify(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+export function AdminStreams() {
+  const queryClient = useQueryClient();
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const listFn = useServerFn(getAllStreams);
+  const saveFn = useServerFn(saveStream);
+  const removeFn = useServerFn(deleteStream);
+
+  const streamsQuery = useQuery({ queryKey: ["streams", "admin"], queryFn: () => listFn({}) });
+
+  const save = useMutation({
+    mutationFn: (values: Draft) =>
+      saveFn({
+        data: {
+          ...values,
+          slug: values.slug || slugify(values.title),
+          starts_at: new Date(values.starts_at).toISOString(),
+          access_code: values.visibility === "code" ? values.access_code : "",
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Session saved");
+      setDraft(null);
+      queryClient.invalidateQueries({ queryKey: ["streams"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save session"),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => removeFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Session deleted");
+      queryClient.invalidateQueries({ queryKey: ["streams"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not delete session"),
+  });
+
+  const list = (streamsQuery.data ?? []) as AdminStream[];
+
+  return (
+    <section className="mt-20">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow-cool">Admin</p>
+          <h2 className="display mt-2 text-[clamp(1.8rem,5vw,3rem)]">Live sessions</h2>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setDraft(emptyDraft())}
+            className="rounded-full bg-[color:var(--sage)] px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-[color:var(--ink)]"
+          >
+            New session
+          </button>
+          <Link
+            to="/live"
+            className="rounded-full border border-border px-6 py-3 text-xs font-bold uppercase tracking-[0.16em]"
+          >
+            View public page
+          </Link>
+        </div>
+      </div>
+
+      <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
+        Set the status to <strong>Live now</strong> to open the stream and notify everyone who
+        asked for a reminder. Private sessions need an invite code — the stream link and the code
+        never leave the server until a signed-in viewer enters the right code.
+      </p>
+
+      {draft && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate(draft);
+          }}
+          className="mt-8 grid gap-4 rounded-3xl border border-border bg-surface p-6"
+        >
+          <Field label="Title">
+            <input
+              required
+              value={draft.title}
+              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+              className={inputClass}
+            />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Status">
+              <select
+                value={draft.status}
+                onChange={(e) => setDraft({ ...draft, status: e.target.value as AdminStream["status"] })}
+                className={inputClass}
+              >
+                <option value="scheduled">Scheduled</option>
+                <option value="live">Live now</option>
+                <option value="ended">Ended / replay</option>
+              </select>
+            </Field>
+            <Field label="Starts at (UTC)">
+              <input
+                type="datetime-local"
+                required
+                value={draft.starts_at.slice(0, 16)}
+                onChange={(e) => setDraft({ ...draft, starts_at: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Who can watch">
+              <select
+                value={draft.visibility}
+                onChange={(e) =>
+                  setDraft({ ...draft, visibility: e.target.value as AdminStream["visibility"] })
+                }
+                className={inputClass}
+              >
+                <option value="public">Any signed-in member or guest</option>
+                <option value="code">Private — invite code only</option>
+              </select>
+            </Field>
+            <Field label="Invite code">
+              <input
+                value={draft.access_code}
+                disabled={draft.visibility !== "code"}
+                onChange={(e) => setDraft({ ...draft, access_code: e.target.value })}
+                placeholder={draft.visibility === "code" ? "e.g. LEADERS26" : "Not needed"}
+                className={`${inputClass} disabled:opacity-50`}
+              />
+            </Field>
+            <Field label="Source">
+              <select
+                value={draft.source_type}
+                onChange={(e) =>
+                  setDraft({ ...draft, source_type: e.target.value as AdminStream["source_type"] })
+                }
+                className={inputClass}
+              >
+                <option value="youtube">YouTube (public or unlisted)</option>
+                <option value="hls">Direct stream link (.m3u8)</option>
+              </select>
+            </Field>
+            <Field label={draft.source_type === "youtube" ? "YouTube video ID" : "Stream URL"}>
+              <input
+                value={draft.source_value}
+                onChange={(e) => setDraft({ ...draft, source_value: e.target.value })}
+                placeholder={draft.source_type === "youtube" ? "dQw4w9WgXcQ" : "https://…/index.m3u8"}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+          <Field label="Poster image URL">
+            <input
+              value={draft.poster_url ?? ""}
+              onChange={(e) => setDraft({ ...draft, poster_url: e.target.value || null })}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Summary">
+            <textarea
+              rows={3}
+              value={draft.summary}
+              onChange={(e) => setDraft({ ...draft, summary: e.target.value })}
+              className={inputClass}
+            />
+          </Field>
+          <label className="flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={draft.published}
+              onChange={(e) => setDraft({ ...draft, published: e.target.checked })}
+            />
+            Visible on the public live page
+          </label>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="submit"
+              disabled={save.isPending}
+              className="rounded-full bg-primary px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-primary-foreground disabled:opacity-50"
+            >
+              Save session
+            </button>
+            <button
+              type="button"
+              onClick={() => setDraft(null)}
+              className="rounded-full border border-border px-6 py-3 text-xs font-bold uppercase tracking-[0.16em]"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="mt-10 grid gap-4">
+        {list.map((stream) => (
+          <article
+            key={stream.id}
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 rounded-3xl border border-border bg-surface p-5"
+          >
+            <div className="min-w-0">
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[color:var(--sage)]">
+                {STATUS_LABEL[stream.status]}
+                {stream.visibility === "code" ? " · private" : ""}
+                {stream.published ? "" : " · draft"}
+              </p>
+              <h3 className="mt-2 truncate font-display text-lg font-bold">{stream.title}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {formatStreamStart(stream.starts_at)} · {stream.source_type.toUpperCase()}
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setDraft({
+                    ...stream,
+                    starts_at: new Date(stream.starts_at).toISOString().slice(0, 16),
+                  })
+                }
+                className="rounded-full border border-border px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em]"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => remove.mutate(stream.id)}
+                className="rounded-full border border-destructive/50 px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-destructive"
+              >
+                Delete
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+const inputClass =
+  "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-[color:var(--sage)]";
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="grid gap-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
+      {label}
+      {children}
+    </label>
+  );
+}
