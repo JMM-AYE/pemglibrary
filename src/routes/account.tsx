@@ -12,6 +12,8 @@ import {
 } from "@/components/profile-fields";
 import { getMyProfile, saveMyProfile } from "@/lib/profile.functions";
 import type { Profile } from "@/lib/profile";
+import { remindersQueryOptions, type Reminder } from "@/lib/reminders";
+import { removeReminder } from "@/lib/reminders.functions";
 
 const DESCRIPTION = "Your PEMG Library profile — update your details, cell group and contact number.";
 
@@ -38,6 +40,13 @@ function AccountPage() {
 
   const loadProfile = useServerFn(getMyProfile);
   const persistProfile = useServerFn(saveMyProfile);
+  const dropReminder = useServerFn(removeReminder);
+
+  const remindersQuery = useQuery({ ...remindersQueryOptions, enabled: status === "in" });
+  const forget = useMutation({
+    mutationFn: (r: Reminder) => dropReminder({ data: { kind: r.kind, target_id: r.target_id } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["reminders"] }),
+  });
 
   useEffect(() => {
     if (status === "out") navigate({ to: "/auth", search: { mode: "signin" } });
@@ -126,6 +135,43 @@ function AccountPage() {
           Upcoming events
         </Link>
       </div>
+
+      <section className="mt-14">
+        <h2 className="display text-2xl">Saved &amp; reminders</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Messages you kept for later and live sessions you'll be notified about.
+        </p>
+        {((remindersQuery.data ?? []) as Reminder[]).length === 0 ? (
+          <p className="mt-6 text-sm text-muted-foreground">
+            Nothing saved yet — tap “Watch later” on a message or “Notify me” on a live session.
+          </p>
+        ) : (
+          <ul className="mt-6 grid gap-3">
+            {((remindersQuery.data ?? []) as Reminder[]).map((r) => (
+              <li
+                key={r.id}
+                className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-4"
+              >
+                <div className="min-w-0">
+                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    {r.kind === "stream" ? "Live session" : "Watch later"}
+                  </p>
+                  <a href={r.href} className="mt-1 block truncate font-semibold hover:underline">
+                    {r.title || r.target_id}
+                  </a>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => forget.mutate(r)}
+                  className="shrink-0 rounded-full border border-border px-4 py-2 text-[0.65rem] font-bold uppercase tracking-[0.14em]"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
