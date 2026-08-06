@@ -3,10 +3,14 @@ import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { deleteStream, getAllStreams, saveStream } from "@/lib/live.functions";
+import { deleteStream, getAllStreams, getStreamIngest, saveStream } from "@/lib/live.functions";
+import { ImageUpload } from "@/components/image-upload";
 import { formatStreamStart, STATUS_LABEL, type AdminStream } from "@/lib/live";
 
-type Draft = Omit<AdminStream, "id"> & { id?: string };
+type Draft = Omit<
+  AdminStream,
+  "id" | "private_token" | "mux_stream_id" | "mux_playback_id" | "mux_stream_key"
+> & { id?: string };
 
 const emptyDraft = (): Draft => ({
   slug: "",
@@ -21,6 +25,17 @@ const emptyDraft = (): Draft => ({
   source_value: "",
   access_code: "",
 });
+
+function toDraft(stream: AdminStream): Draft {
+  const {
+    private_token: _t,
+    mux_stream_id: _m,
+    mux_playback_id: _p,
+    mux_stream_key: _k,
+    ...rest
+  } = stream;
+  return { ...rest, starts_at: new Date(stream.starts_at).toISOString().slice(0, 16) };
+}
 
 function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
