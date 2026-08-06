@@ -9,7 +9,7 @@ const MAX_AGE_DAYS = 7;
 
 export async function notifyNewVideos() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const sermons = await fetchChannelSermons(PEMG_CHANNEL_ID);
+  const { sermons } = await fetchChannelSermons(PEMG_CHANNEL_ID);
   const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
   const fresh = sermons

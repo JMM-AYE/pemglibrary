@@ -22,6 +22,7 @@ import { Route as MessagesSlugRouteImport } from './routes/messages.$slug'
 import { Route as LiveSlugRouteImport } from './routes/live.$slug'
 import { Route as EventsSlugRouteImport } from './routes/events.$slug'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
+import { Route as ApiPublicNewContentRouteImport } from './routes/api/public/new-content'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -88,6 +89,11 @@ const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   path: '/articles/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNewContentRoute = ApiPublicNewContentRouteImport.update({
+  id: '/api/public/new-content',
+  path: '/api/public/new-content',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/events/': typeof EventsIndexRoute
   '/live/': typeof LiveIndexRoute
   '/messages/': typeof MessagesIndexRoute
+  '/api/public/new-content': typeof ApiPublicNewContentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsIndexRoute
   '/live': typeof LiveIndexRoute
   '/messages': typeof MessagesIndexRoute
+  '/api/public/new-content': typeof ApiPublicNewContentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/events/': typeof EventsIndexRoute
   '/live/': typeof LiveIndexRoute
   '/messages/': typeof MessagesIndexRoute
+  '/api/public/new-content': typeof ApiPublicNewContentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/live/'
     | '/messages/'
+    | '/api/public/new-content'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/live'
     | '/messages'
+    | '/api/public/new-content'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/live/'
     | '/messages/'
+    | '/api/public/new-content'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   EventsIndexRoute: typeof EventsIndexRoute
   LiveIndexRoute: typeof LiveIndexRoute
   MessagesIndexRoute: typeof MessagesIndexRoute
+  ApiPublicNewContentRoute: typeof ApiPublicNewContentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArticlesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/new-content': {
+      id: '/api/public/new-content'
+      path: '/api/public/new-content'
+      fullPath: '/api/public/new-content'
+      preLoaderRoute: typeof ApiPublicNewContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -309,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsIndexRoute: EventsIndexRoute,
   LiveIndexRoute: LiveIndexRoute,
   MessagesIndexRoute: MessagesIndexRoute,
+  ApiPublicNewContentRoute: ApiPublicNewContentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
