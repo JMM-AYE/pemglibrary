@@ -181,7 +181,6 @@ export const saveStream = createServerFn({ method: "POST" })
         source_type,
         source_value,
         access_code: access_code || null,
-        private_token: newToken(),
         updated_at: new Date().toISOString(),
       },
       { onConflict: "stream_id", ignoreDuplicates: false },
