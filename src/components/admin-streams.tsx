@@ -105,8 +105,10 @@ export function AdminStreams() {
 
       <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
         Set the status to <strong>Live now</strong> to open the stream and notify everyone who
-        asked for a reminder. Private sessions need an invite code — the stream link and the code
-        never leave the server until a signed-in viewer enters the right code.
+        has an account. Private sessions get their own secret link — the playback source and that
+        link never leave the server until a signed-in viewer opens the right URL. Use{" "}
+        <strong>Broadcast details</strong> on a saved session to get the RTMP server and stream key
+        for vMix or OBS.
       </p>
 
       {draft && (
@@ -155,17 +157,8 @@ export function AdminStreams() {
                 className={inputClass}
               >
                 <option value="public">Any signed-in member or guest</option>
-                <option value="code">Private — invite code only</option>
+                <option value="code">Private — secret link only</option>
               </select>
-            </Field>
-            <Field label="Invite code">
-              <input
-                value={draft.access_code}
-                disabled={draft.visibility !== "code"}
-                onChange={(e) => setDraft({ ...draft, access_code: e.target.value })}
-                placeholder={draft.visibility === "code" ? "e.g. LEADERS26" : "Not needed"}
-                className={`${inputClass} disabled:opacity-50`}
-              />
             </Field>
             <Field label="Source">
               <select
@@ -176,7 +169,7 @@ export function AdminStreams() {
                 className={inputClass}
               >
                 <option value="youtube">YouTube (public or unlisted)</option>
-                <option value="hls">Direct stream link (.m3u8)</option>
+                <option value="hls">Direct stream / RTMP broadcast (.m3u8)</option>
               </select>
             </Field>
             <Field label={draft.source_type === "youtube" ? "YouTube video ID" : "Stream URL"}>
@@ -188,13 +181,12 @@ export function AdminStreams() {
               />
             </Field>
           </div>
-          <Field label="Poster image URL">
-            <input
-              value={draft.poster_url ?? ""}
-              onChange={(e) => setDraft({ ...draft, poster_url: e.target.value || null })}
-              className={inputClass}
-            />
-          </Field>
+          <ImageUpload
+            label="Poster image"
+            folder="streams"
+            value={draft.poster_url}
+            onChange={(url) => setDraft({ ...draft, poster_url: url })}
+          />
           <Field label="Summary">
             <textarea
               rows={3}
