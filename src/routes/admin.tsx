@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminStreams } from "@/components/admin-streams";
+import { ImageUpload } from "@/components/image-upload";
 import { deleteEvent, getAllEvents, getIsAdmin, saveEvent } from "@/lib/events.functions";
 import { formatEventDate, formatEventTime, type LibraryEvent } from "@/lib/events";
 
