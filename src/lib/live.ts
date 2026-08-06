@@ -21,6 +21,10 @@ export type AdminStream = LiveStream & {
   source_type: StreamSourceType;
   source_value: string;
   access_code: string;
+  private_token: string;
+  mux_stream_id: string;
+  mux_playback_id: string;
+  mux_stream_key: string;
 };
 
 export const streamsQueryOptions = queryOptions({

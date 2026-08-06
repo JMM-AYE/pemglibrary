@@ -3,10 +3,14 @@ import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { deleteStream, getAllStreams, saveStream } from "@/lib/live.functions";
+import { deleteStream, getAllStreams, getStreamIngest, saveStream } from "@/lib/live.functions";
+import { ImageUpload } from "@/components/image-upload";
 import { formatStreamStart, STATUS_LABEL, type AdminStream } from "@/lib/live";
 
-type Draft = Omit<AdminStream, "id"> & { id?: string };
+type Draft = Omit<
+  AdminStream,
+  "id" | "private_token" | "mux_stream_id" | "mux_playback_id" | "mux_stream_key"
+> & { id?: string };
 
 const emptyDraft = (): Draft => ({
   slug: "",
@@ -21,6 +25,17 @@ const emptyDraft = (): Draft => ({
   source_value: "",
   access_code: "",
 });
+
+function toDraft(stream: AdminStream): Draft {
+  const {
+    private_token: _t,
+    mux_stream_id: _m,
+    mux_playback_id: _p,
+    mux_stream_key: _k,
+    ...rest
+  } = stream;
+  return { ...rest, starts_at: new Date(stream.starts_at).toISOString().slice(0, 16) };
+}
 
 function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -90,8 +105,10 @@ export function AdminStreams() {
 
       <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
         Set the status to <strong>Live now</strong> to open the stream and notify everyone who
-        asked for a reminder. Private sessions need an invite code — the stream link and the code
-        never leave the server until a signed-in viewer enters the right code.
+        has an account. Private sessions get their own secret link — the playback source and that
+        link never leave the server until a signed-in viewer opens the right URL. Use{" "}
+        <strong>Broadcast details</strong> on a saved session to get the RTMP server and stream key
+        for vMix or OBS.
       </p>
 
       {draft && (
@@ -140,17 +157,8 @@ export function AdminStreams() {
                 className={inputClass}
               >
                 <option value="public">Any signed-in member or guest</option>
-                <option value="code">Private — invite code only</option>
+                <option value="code">Private — secret link only</option>
               </select>
-            </Field>
-            <Field label="Invite code">
-              <input
-                value={draft.access_code}
-                disabled={draft.visibility !== "code"}
-                onChange={(e) => setDraft({ ...draft, access_code: e.target.value })}
-                placeholder={draft.visibility === "code" ? "e.g. LEADERS26" : "Not needed"}
-                className={`${inputClass} disabled:opacity-50`}
-              />
             </Field>
             <Field label="Source">
               <select
@@ -161,7 +169,7 @@ export function AdminStreams() {
                 className={inputClass}
               >
                 <option value="youtube">YouTube (public or unlisted)</option>
-                <option value="hls">Direct stream link (.m3u8)</option>
+                <option value="hls">Direct stream / RTMP broadcast (.m3u8)</option>
               </select>
             </Field>
             <Field label={draft.source_type === "youtube" ? "YouTube video ID" : "Stream URL"}>
@@ -173,13 +181,12 @@ export function AdminStreams() {
               />
             </Field>
           </div>
-          <Field label="Poster image URL">
-            <input
-              value={draft.poster_url ?? ""}
-              onChange={(e) => setDraft({ ...draft, poster_url: e.target.value || null })}
-              className={inputClass}
-            />
-          </Field>
+          <ImageUpload
+            label="Poster image"
+            folder="streams"
+            value={draft.poster_url}
+            onChange={(url) => setDraft({ ...draft, poster_url: url })}
+          />
           <Field label="Summary">
             <textarea
               rows={3}
@@ -217,46 +224,150 @@ export function AdminStreams() {
 
       <div className="mt-10 grid gap-4">
         {list.map((stream) => (
-          <article
+          <StreamRow
             key={stream.id}
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 rounded-3xl border border-border bg-surface p-5"
-          >
-            <div className="min-w-0">
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[color:var(--sage)]">
-                {STATUS_LABEL[stream.status]}
-                {stream.visibility === "code" ? " · private" : ""}
-                {stream.published ? "" : " · draft"}
-              </p>
-              <h3 className="mt-2 truncate font-display text-lg font-bold">{stream.title}</h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {formatStreamStart(stream.starts_at)} · {stream.source_type.toUpperCase()}
-              </p>
-            </div>
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  setDraft({
-                    ...stream,
-                    starts_at: new Date(stream.starts_at).toISOString().slice(0, 16),
-                  })
-                }
-                className="rounded-full border border-border px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em]"
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => remove.mutate(stream.id)}
-                className="rounded-full border border-destructive/50 px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-destructive"
-              >
-                Delete
-              </button>
-            </div>
-          </article>
+            stream={stream}
+            onEdit={() => setDraft(toDraft(stream))}
+            onDelete={() => remove.mutate(stream.id)}
+          />
         ))}
       </div>
     </section>
+  );
+}
+
+function StreamRow({
+  stream,
+  onEdit,
+  onDelete,
+}: {
+  stream: AdminStream;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const ingestFn = useServerFn(getStreamIngest);
+  const [ingest, setIngest] = useState<{
+    rtmpUrl: string;
+    streamKey: string;
+    playbackUrl: string;
+  } | null>(null);
+
+  const broadcast = useMutation({
+    mutationFn: () => ingestFn({ data: { id: stream.id } }),
+    onSuccess: (data) => {
+      setIngest(data);
+      queryClient.invalidateQueries({ queryKey: ["streams"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not reach the broadcaster"),
+  });
+
+  const shareLink =
+    stream.visibility === "code" && stream.private_token
+      ? `/live/${stream.slug}?key=${stream.private_token}`
+      : null;
+
+  return (
+    <article className="rounded-3xl border border-border bg-surface p-5">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+        <div className="min-w-0">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[color:var(--sage)]">
+            {STATUS_LABEL[stream.status]}
+            {stream.visibility === "code" ? " · private" : ""}
+            {stream.published ? "" : " · draft"}
+          </p>
+          <h3 className="mt-2 truncate font-display text-lg font-bold">{stream.title}</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {formatStreamStart(stream.starts_at)} · {stream.source_type.toUpperCase()}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => broadcast.mutate()}
+            disabled={broadcast.isPending}
+            className="rounded-full border border-border px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] disabled:opacity-50"
+          >
+            {broadcast.isPending ? "Preparing…" : "Broadcast details"}
+          </button>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-full border border-border px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em]"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="rounded-full border border-destructive/50 px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-destructive"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+
+      {shareLink && (
+        <CopyRow
+          label="Private invite link"
+          value={typeof window === "undefined" ? shareLink : `${window.location.origin}${shareLink}`}
+        />
+      )}
+
+      {ingest && (
+        <div className="mt-4 grid gap-3 rounded-2xl border border-border bg-background p-4">
+          <p className="text-xs text-muted-foreground">
+            Paste these into vMix or OBS (Settings → Stream → Custom). Keep the stream key private.
+          </p>
+          <CopyRow label="RTMP server" value={ingest.rtmpUrl} />
+          <CopyRow label="Stream key" value={ingest.streamKey} secret />
+          <CopyRow label="Playback URL" value={ingest.playbackUrl} />
+        </div>
+      )}
+    </article>
+  );
+}
+
+function CopyRow({
+  label,
+  value,
+  secret = false,
+}: {
+  label: string;
+  value: string;
+  secret?: boolean;
+}) {
+  const [shown, setShown] = useState(!secret);
+  return (
+    <div className="mt-3 grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+      <span className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </span>
+      <code className="truncate rounded-xl border border-border bg-surface px-3 py-2 text-xs">
+        {shown ? value : "•".repeat(24)}
+      </code>
+      <span className="flex gap-2">
+        {secret && (
+          <button
+            type="button"
+            onClick={() => setShown((s) => !s)}
+            className="rounded-full border border-border px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.14em]"
+          >
+            {shown ? "Hide" : "Show"}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            void navigator.clipboard.writeText(value);
+            toast.success(`${label} copied`);
+          }}
+          className="rounded-full border border-border px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.14em]"
+        >
+          Copy
+        </button>
+      </span>
+    </div>
   );
 }
 

@@ -66,6 +66,10 @@ export type Database = {
         Row: {
           access_code: string | null
           created_at: string
+          mux_playback_id: string | null
+          mux_stream_id: string | null
+          mux_stream_key: string | null
+          private_token: string | null
           source_type: Database["public"]["Enums"]["stream_source"]
           source_value: string
           stream_id: string
@@ -74,6 +78,10 @@ export type Database = {
         Insert: {
           access_code?: string | null
           created_at?: string
+          mux_playback_id?: string | null
+          mux_stream_id?: string | null
+          mux_stream_key?: string | null
+          private_token?: string | null
           source_type?: Database["public"]["Enums"]["stream_source"]
           source_value?: string
           stream_id: string
@@ -82,6 +90,10 @@ export type Database = {
         Update: {
           access_code?: string | null
           created_at?: string
+          mux_playback_id?: string | null
+          mux_stream_id?: string | null
+          mux_stream_key?: string | null
+          private_token?: string | null
           source_type?: Database["public"]["Enums"]["stream_source"]
           source_value?: string
           stream_id?: string
@@ -166,6 +178,27 @@ export type Database = {
           read_at?: string | null
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      notified_content: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          ref_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          ref_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          ref_id?: string
         }
         Relationships: []
       }

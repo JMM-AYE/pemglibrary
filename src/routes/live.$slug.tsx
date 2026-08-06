@@ -11,6 +11,9 @@ import { getStreamPlayback } from "@/lib/live.functions";
 import { formatStreamStart, STATUS_LABEL, streamQueryOptions, type LiveStream } from "@/lib/live";
 
 export const Route = createFileRoute("/live/$slug")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    key: typeof search["key"] === "string" ? (search["key"] as string) : undefined,
+  }),
   loader: async ({ context, params }) => {
     const stream = await context.queryClient.ensureQueryData(streamQueryOptions(params.slug));
     if (!stream) throw notFound();
@@ -43,6 +46,7 @@ type Playback =
 
 function LiveStreamPage() {
   const { slug } = Route.useParams();
+  const { key } = Route.useSearch();
   const { data } = useSuspenseQuery(streamQueryOptions(slug));
   const stream = data as LiveStream | null;
   const { status } = useSession();
@@ -51,17 +55,24 @@ function LiveStreamPage() {
   const playbackFn = useServerFn(getStreamPlayback);
 
   const unlock = useMutation({
-    mutationFn: (value: string) => playbackFn({ data: { slug, code: value } }),
+    mutationFn: (value: string) =>
+      playbackFn({ data: { slug, code: value, token: key ?? "" } }),
     onSuccess: (result) => setPlayback(result as Playback),
   });
 
-  // Public sessions resolve automatically once the visitor is signed in.
+  // Public sessions — and private ones opened with a valid invite link —
+  // resolve automatically once the visitor is signed in.
   useEffect(() => {
-    if (status === "in" && stream && stream.visibility === "public" && !playback) {
+    if (
+      status === "in" &&
+      stream &&
+      !playback &&
+      (stream.visibility === "public" || key)
+    ) {
       unlock.mutate("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, stream?.visibility]);
+  }, [status, stream?.visibility, key]);
 
   if (!stream) return null;
   const live = stream.status === "live";
@@ -121,7 +132,7 @@ function LiveStreamPage() {
             {[
               ["Status", STATUS_LABEL[stream.status]],
               ["Starts", formatStreamStart(stream.starts_at)],
-              ["Access", stream.visibility === "code" ? "Invite code" : "Open to signed-in users"],
+              ["Access", stream.visibility === "code" ? "Invite link" : "Open to signed-in users"],
             ].map(([label, value]) => (
               <div key={label} className="flex justify-between gap-4 border-b border-border pb-3">
                 <dt className="text-muted-foreground">{label}</dt>
@@ -187,14 +198,14 @@ function LockedStage({
             {notReady
               ? "Stream not started"
               : needsCode
-                ? "Enter your invite code"
+                ? "Private session"
                 : "Connecting…"}
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
             {notReady
               ? "The host hasn't opened this session yet. Set a reminder and we'll notify you."
               : needsCode
-                ? "This is a private session. Use the code shared with you to join."
+                ? "Open the private invite link the host shared with you, or enter your invite code below."
                 : "Getting the stream ready."}
           </p>
           {needsCode && !notReady && (

@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminStreams } from "@/components/admin-streams";
+import { ImageUpload } from "@/components/image-upload";
 import { deleteEvent, getAllEvents, getIsAdmin, saveEvent } from "@/lib/events.functions";
 import { formatEventDate, formatEventTime, type LibraryEvent } from "@/lib/events";
 
@@ -226,6 +227,12 @@ function AdminPage() {
               className={inputClass}
             />
           </Field>
+          <ImageUpload
+            label="Event image"
+            folder="events"
+            value={draft.image_url}
+            onChange={(url) => setDraft({ ...draft, image_url: url })}
+          />
           <label className="flex items-center gap-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">
             <input
               type="checkbox"
