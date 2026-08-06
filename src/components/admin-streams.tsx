@@ -224,46 +224,150 @@ export function AdminStreams() {
 
       <div className="mt-10 grid gap-4">
         {list.map((stream) => (
-          <article
+          <StreamRow
             key={stream.id}
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 rounded-3xl border border-border bg-surface p-5"
-          >
-            <div className="min-w-0">
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[color:var(--sage)]">
-                {STATUS_LABEL[stream.status]}
-                {stream.visibility === "code" ? " · private" : ""}
-                {stream.published ? "" : " · draft"}
-              </p>
-              <h3 className="mt-2 truncate font-display text-lg font-bold">{stream.title}</h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {formatStreamStart(stream.starts_at)} · {stream.source_type.toUpperCase()}
-              </p>
-            </div>
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  setDraft({
-                    ...stream,
-                    starts_at: new Date(stream.starts_at).toISOString().slice(0, 16),
-                  })
-                }
-                className="rounded-full border border-border px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em]"
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => remove.mutate(stream.id)}
-                className="rounded-full border border-destructive/50 px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-destructive"
-              >
-                Delete
-              </button>
-            </div>
-          </article>
+            stream={stream}
+            onEdit={() => setDraft(toDraft(stream))}
+            onDelete={() => remove.mutate(stream.id)}
+          />
         ))}
       </div>
     </section>
+  );
+}
+
+function StreamRow({
+  stream,
+  onEdit,
+  onDelete,
+}: {
+  stream: AdminStream;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const ingestFn = useServerFn(getStreamIngest);
+  const [ingest, setIngest] = useState<{
+    rtmpUrl: string;
+    streamKey: string;
+    playbackUrl: string;
+  } | null>(null);
+
+  const broadcast = useMutation({
+    mutationFn: () => ingestFn({ data: { id: stream.id } }),
+    onSuccess: (data) => {
+      setIngest(data);
+      queryClient.invalidateQueries({ queryKey: ["streams"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not reach the broadcaster"),
+  });
+
+  const shareLink =
+    stream.visibility === "code" && stream.private_token
+      ? `/live/${stream.slug}?key=${stream.private_token}`
+      : null;
+
+  return (
+    <article className="rounded-3xl border border-border bg-surface p-5">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+        <div className="min-w-0">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[color:var(--sage)]">
+            {STATUS_LABEL[stream.status]}
+            {stream.visibility === "code" ? " · private" : ""}
+            {stream.published ? "" : " · draft"}
+          </p>
+          <h3 className="mt-2 truncate font-display text-lg font-bold">{stream.title}</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {formatStreamStart(stream.starts_at)} · {stream.source_type.toUpperCase()}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => broadcast.mutate()}
+            disabled={broadcast.isPending}
+            className="rounded-full border border-border px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] disabled:opacity-50"
+          >
+            {broadcast.isPending ? "Preparing…" : "Broadcast details"}
+          </button>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-full border border-border px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em]"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="rounded-full border border-destructive/50 px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-destructive"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+
+      {shareLink && (
+        <CopyRow
+          label="Private invite link"
+          value={typeof window === "undefined" ? shareLink : `${window.location.origin}${shareLink}`}
+        />
+      )}
+
+      {ingest && (
+        <div className="mt-4 grid gap-3 rounded-2xl border border-border bg-background p-4">
+          <p className="text-xs text-muted-foreground">
+            Paste these into vMix or OBS (Settings → Stream → Custom). Keep the stream key private.
+          </p>
+          <CopyRow label="RTMP server" value={ingest.rtmpUrl} />
+          <CopyRow label="Stream key" value={ingest.streamKey} secret />
+          <CopyRow label="Playback URL" value={ingest.playbackUrl} />
+        </div>
+      )}
+    </article>
+  );
+}
+
+function CopyRow({
+  label,
+  value,
+  secret = false,
+}: {
+  label: string;
+  value: string;
+  secret?: boolean;
+}) {
+  const [shown, setShown] = useState(!secret);
+  return (
+    <div className="mt-3 grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+      <span className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </span>
+      <code className="truncate rounded-xl border border-border bg-surface px-3 py-2 text-xs">
+        {shown ? value : "•".repeat(24)}
+      </code>
+      <span className="flex gap-2">
+        {secret && (
+          <button
+            type="button"
+            onClick={() => setShown((s) => !s)}
+            className="rounded-full border border-border px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.14em]"
+          >
+            {shown ? "Hide" : "Show"}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            void navigator.clipboard.writeText(value);
+            toast.success(`${label} copied`);
+          }}
+          className="rounded-full border border-border px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.14em]"
+        >
+          Copy
+        </button>
+      </span>
+    </div>
   );
 }
 
