@@ -226,6 +226,12 @@ function AdminPage() {
               className={inputClass}
             />
           </Field>
+          <ImageUpload
+            label="Event image"
+            folder="events"
+            value={draft.image_url}
+            onChange={(url) => setDraft({ ...draft, image_url: url })}
+          />
           <label className="flex items-center gap-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">
             <input
               type="checkbox"
