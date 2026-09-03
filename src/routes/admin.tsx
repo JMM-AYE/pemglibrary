@@ -66,7 +66,7 @@ function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (session === "out") navigate({ to: "/auth" });
+    if (session === "out") navigate({ to: "/auth", search: { mode: "signin" } });
   }, [session, navigate]);
 
   const adminQuery = useQuery({
