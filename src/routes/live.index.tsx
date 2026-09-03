@@ -70,7 +70,7 @@ function Section({ title, items }: { title: string; items: LiveStream[] }) {
 export function StreamCard({ stream }: { stream: LiveStream }) {
   return (
     <article className="card-lift overflow-hidden rounded-3xl border border-border bg-surface">
-      <Link to="/live/$slug" params={{ slug: stream.slug }} className="block">
+      <Link to="/live/$slug" params={{ slug: stream.slug }} search={{ key: undefined }} className="block">
         <div className="relative aspect-video overflow-hidden bg-background">
           {stream.poster_url ? (
             <img
@@ -102,7 +102,7 @@ export function StreamCard({ stream }: { stream: LiveStream }) {
         </div>
       </Link>
       <div className="p-6">
-        <Link to="/live/$slug" params={{ slug: stream.slug }}>
+        <Link to="/live/$slug" params={{ slug: stream.slug }} search={{ key: undefined }}>
           <h3 className="font-display text-xl font-bold leading-tight">{stream.title}</h3>
         </Link>
         <p className="mt-3 text-xs text-muted-foreground">{formatStreamStart(stream.starts_at)}</p>

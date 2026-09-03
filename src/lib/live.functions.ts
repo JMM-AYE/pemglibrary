@@ -101,10 +101,7 @@ export const getStreamPlayback = createServerFn({ method: "POST" })
   });
 
 async function assertAdmin(context: { supabase: ReturnType<typeof createPublicClient>; userId: string }) {
-  const { data } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
+  const { data } = await context.supabase.rpc("is_admin");
   if (!data) throw new Error("Forbidden: admin access required");
 }
 
