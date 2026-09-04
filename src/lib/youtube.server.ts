@@ -122,3 +122,37 @@ export async function fetchChannelSermons(channelId: string) {
   const sermons = [...byId.values()].sort((a, b) => b.date.localeCompare(a.date));
   return { sermons, series: playlists.map((p) => p.title) };
 }
+
+/**
+ * Merges several channels into one library. A video that appears on more than
+ * one channel (re-uploads, cross-posts) is kept once — the first occurrence
+ * wins, and a playlist-derived series name always beats the title heuristic.
+ */
+export async function fetchLibrarySermons(channelIds: readonly string[]) {
+  const results = await Promise.all(channelIds.map((id) => fetchChannelSermons(id)));
+
+  const byId = new Map<string, Sermon>();
+  const byTitle = new Map<string, string>();
+
+  for (const { sermons } of results) {
+    for (const sermon of sermons) {
+      const titleKey = sermon.title.trim().toLowerCase();
+      const duplicateId = byTitle.get(titleKey);
+      if (duplicateId) {
+        const kept = byId.get(duplicateId);
+        // Prefer a real playlist series over the generic fallback.
+        if (kept && kept.series === "Messages" && sermon.series !== "Messages") {
+          byId.set(duplicateId, { ...kept, series: sermon.series });
+        }
+        continue;
+      }
+      if (byId.has(sermon.videoId)) continue;
+      byId.set(sermon.videoId, sermon);
+      byTitle.set(titleKey, sermon.videoId);
+    }
+  }
+
+  const sermons = [...byId.values()].sort((a, b) => b.date.localeCompare(a.date));
+  const series = [...new Set(results.flatMap((r) => r.series))];
+  return { sermons, series };
+}
