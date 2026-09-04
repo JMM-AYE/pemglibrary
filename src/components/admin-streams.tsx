@@ -274,7 +274,14 @@ function StreamRow({
       setIngest(data);
       queryClient.invalidateQueries({ queryKey: ["streams"] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not reach the broadcaster"),
+    onError: (e) => {
+      const message = e instanceof Error ? e.message : "Could not reach the broadcaster";
+      toast.error(
+        /free plan/i.test(message)
+          ? "The broadcast account can't create live inputs yet. Use a YouTube or Zoom source, or upgrade the streaming plan."
+          : message,
+      );
+    },
   });
 
   const shareLink =
