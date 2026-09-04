@@ -12,3 +12,6 @@ export type Sermon = {
 };
 
 export const PEMG_CHANNEL_ID = "UCJAxUPzVhDs8nYrsXmSTKNg";
+
+/** Every channel the library pulls messages from. Videos are de-duplicated by video id. */
+export const PEMG_CHANNEL_IDS = [PEMG_CHANNEL_ID, "UCrQeaCXWuaUa3pgAjvdUqnw"] as const;
