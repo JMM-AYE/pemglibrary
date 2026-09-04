@@ -71,3 +71,26 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const dismissNotification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().min(1).max(100) }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("notifications").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Clear the inbox: everything, or only the ones already read. */
+export const clearNotifications = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ scope: z.enum(["all", "read"]).default("all") }).parse(data ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    let q = context.supabase.from("notifications").delete().eq("user_id", context.userId);
+    if (data.scope === "read") q = q.not("read_at", "is", null);
+    const { error } = await q;
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
