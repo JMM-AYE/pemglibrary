@@ -321,7 +321,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       attendee_type: "member" | "guest"
-      stream_source: "youtube" | "hls"
+      stream_source: "youtube" | "hls" | "zoom"
       stream_status: "scheduled" | "live" | "ended"
       stream_visibility: "public" | "code"
     }
@@ -453,7 +453,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       attendee_type: ["member", "guest"],
-      stream_source: ["youtube", "hls"],
+      stream_source: ["youtube", "hls", "zoom"],
       stream_status: ["scheduled", "live", "ended"],
       stream_visibility: ["public", "code"],
     },
