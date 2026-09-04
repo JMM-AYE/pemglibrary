@@ -170,13 +170,28 @@ export function AdminStreams() {
               >
                 <option value="youtube">YouTube (public or unlisted)</option>
                 <option value="hls">Direct stream / RTMP broadcast (.m3u8)</option>
+                <option value="zoom">Zoom meeting link</option>
               </select>
             </Field>
-            <Field label={draft.source_type === "youtube" ? "YouTube video ID" : "Stream URL"}>
+            <Field
+              label={
+                draft.source_type === "youtube"
+                  ? "YouTube video ID"
+                  : draft.source_type === "zoom"
+                    ? "Zoom join link"
+                    : "Stream URL"
+              }
+            >
               <input
                 value={draft.source_value}
                 onChange={(e) => setDraft({ ...draft, source_value: e.target.value })}
-                placeholder={draft.source_type === "youtube" ? "dQw4w9WgXcQ" : "https://…/index.m3u8"}
+                placeholder={
+                  draft.source_type === "youtube"
+                    ? "dQw4w9WgXcQ"
+                    : draft.source_type === "zoom"
+                      ? "https://zoom.us/j/1234567890?pwd=…"
+                      : "https://…/index.m3u8"
+                }
                 className={inputClass}
               />
             </Field>

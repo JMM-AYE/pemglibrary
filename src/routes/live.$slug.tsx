@@ -41,7 +41,7 @@ export const Route = createFileRoute("/live/$slug")({
 });
 
 type Playback =
-  | { ok: true; sourceType: "youtube" | "hls"; sourceValue: string }
+  | { ok: true; sourceType: "youtube" | "hls" | "zoom"; sourceValue: string }
   | { ok: false; reason: "missing" | "not-ready" | "code" };
 
 function LiveStreamPage() {
@@ -92,6 +92,12 @@ function LiveStreamPage() {
           {playback?.ok ? (
             playback.sourceType === "hls" ? (
               <HlsPlayer src={playback.sourceValue} poster={stream.poster_url} />
+            ) : playback.sourceType === "zoom" ? (
+              <ZoomStage
+                url={playback.sourceValue}
+                poster={stream.poster_url}
+                title={stream.title}
+              />
             ) : (
               <div className="aspect-video w-full overflow-hidden rounded-3xl border border-border bg-black">
                 <iframe
@@ -153,6 +159,40 @@ function LiveStreamPage() {
             />
           )}
         </aside>
+      </div>
+    </div>
+  );
+}
+
+function ZoomStage({
+  url,
+  poster,
+  title,
+}: {
+  url: string;
+  poster: string | null;
+  title: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-border bg-surface">
+      {poster && (
+        <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20" />
+      )}
+      <div className="relative flex flex-col items-center gap-5 px-6 py-16 text-center sm:py-24">
+        <p className="eyebrow">Zoom session</p>
+        <h2 className="display max-w-xl text-[clamp(1.5rem,4vw,2.5rem)]">{title}</h2>
+        <p className="max-w-md text-sm text-muted-foreground">
+          This session is hosted on Zoom. Your access has been confirmed — open the meeting to
+          join Pastor Enoch and the team.
+        </p>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full bg-primary px-7 py-3 text-sm font-bold uppercase tracking-[0.14em] text-primary-foreground"
+        >
+          Join the Zoom meeting
+        </a>
       </div>
     </div>
   );
