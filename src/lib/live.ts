@@ -3,7 +3,7 @@ import { getPublicStream, getPublicStreams, getAllStreams } from "./live.functio
 
 export type StreamStatus = "scheduled" | "live" | "ended";
 export type StreamVisibility = "public" | "code";
-export type StreamSourceType = "youtube" | "hls";
+export type StreamSourceType = "youtube" | "hls" | "zoom";
 
 export type LiveStream = {
   id: string;

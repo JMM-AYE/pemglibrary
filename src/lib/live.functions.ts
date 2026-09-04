@@ -16,7 +16,7 @@ const streamInput = z.object({
   starts_at: z.string().min(1),
   poster_url: z.string().max(500).nullable().default(null),
   published: z.boolean().default(true),
-  source_type: z.enum(["youtube", "hls"]).default("youtube"),
+  source_type: z.enum(["youtube", "hls", "zoom"]).default("youtube"),
   source_value: z.string().max(1000).default(""),
   access_code: z.string().max(60).default(""),
 });
@@ -95,7 +95,7 @@ export const getStreamPlayback = createServerFn({ method: "POST" })
     }
     return {
       ok: true as const,
-      sourceType: source.source_type as "youtube" | "hls",
+      sourceType: source.source_type as "youtube" | "hls" | "zoom",
       sourceValue: source.source_value,
     };
   });
@@ -131,7 +131,7 @@ export const getAllStreams = createServerFn({ method: "GET" })
       };
       return {
         ...stream,
-        source_type: (sources?.source_type ?? "youtube") as "youtube" | "hls",
+        source_type: (sources?.source_type ?? "youtube") as "youtube" | "hls" | "zoom",
         source_value: sources?.source_value ?? "",
         access_code: sources?.access_code ?? "",
         private_token: sources?.private_token ?? "",

@@ -2,14 +2,14 @@
  * Fans out an in-app notification to every registered account, once per piece
  * of content. `notified_content` keeps the "already told them" ledger.
  */
-import { fetchChannelSermons } from "./youtube.server";
-import { PEMG_CHANNEL_ID } from "./youtube-types";
+import { fetchLibrarySermons } from "./youtube.server";
+import { PEMG_CHANNEL_IDS } from "./youtube-types";
 
 const MAX_AGE_DAYS = 7;
 
 export async function notifyNewVideos() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { sermons } = await fetchChannelSermons(PEMG_CHANNEL_ID);
+  const { sermons } = await fetchLibrarySermons(PEMG_CHANNEL_IDS);
   const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
   const fresh = sermons

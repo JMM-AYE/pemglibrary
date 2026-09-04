@@ -1,0 +1,1 @@
+ALTER TYPE public.stream_source ADD VALUE IF NOT EXISTS 'zoom';
