@@ -69,7 +69,7 @@ export function ZoomStage({
         }
 
         setPhase("joining");
-        const { default: ZoomMtgEmbedded } = await import("@zoom/meetingsdk/embedded");
+        const ZoomMtgEmbedded = await loadZoomEmbedded();
         if (cancelled || !rootRef.current) return;
 
         const zoomClient = ZoomMtgEmbedded.createClient();
