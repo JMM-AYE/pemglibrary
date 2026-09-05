@@ -43,7 +43,7 @@ export function SermonCard({ sermon }: { sermon: Sermon }) {
       </div>
       <div className="p-6">
         <h3 className="font-display text-xl font-bold leading-tight">{sermon.title}</h3>
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-3 text-xs text-muted-foreground" suppressHydrationWarning>
           {formatSermonDate(sermon.date)}
           {sermon.views !== null ? ` · ${sermon.views.toLocaleString()} views` : ""}
         </p>
