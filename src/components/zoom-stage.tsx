@@ -4,6 +4,44 @@ import { getZoomJoinConfig } from "@/lib/zoom.functions";
 
 type Phase = "loading" | "joining" | "joined" | "external" | "error";
 
+const ZOOM_SDK_VERSION = "6.2.0";
+
+type ZoomEmbedded = {
+  createClient: () => {
+    init: (options: Record<string, unknown>) => Promise<unknown>;
+    join: (options: Record<string, unknown>) => Promise<unknown>;
+  };
+};
+
+/**
+ * Loads Zoom's embedded client from their CDN. The npm bundle conflicts with
+ * the app's own React copy during bundling, so the CDN build is used instead.
+ */
+function loadZoomEmbedded(): Promise<ZoomEmbedded> {
+  const w = window as unknown as { ZoomMtgEmbedded?: ZoomEmbedded };
+  if (w.ZoomMtgEmbedded) return Promise.resolve(w.ZoomMtgEmbedded);
+
+  const src = `https://source.zoom.us/${ZOOM_SDK_VERSION}/zoom-meeting-embedded-${ZOOM_SDK_VERSION}.min.js`;
+  const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
+  const script = existing ?? document.createElement("script");
+
+  return new Promise<ZoomEmbedded>((resolve, reject) => {
+    const done = () => {
+      if (w.ZoomMtgEmbedded) resolve(w.ZoomMtgEmbedded);
+      else reject(new Error("Zoom could not be loaded here."));
+    };
+    script.addEventListener("load", done);
+    script.addEventListener("error", () => reject(new Error("Zoom could not be loaded here.")));
+    if (!existing) {
+      script.src = src;
+      script.async = true;
+      document.head.appendChild(script);
+    } else if (w.ZoomMtgEmbedded) {
+      done();
+    }
+  });
+}
+
 /**
  * Plays a Zoom session inside the page using the Zoom Meeting SDK. When Zoom
  * SDK credentials are not configured we degrade to the plain join link.
