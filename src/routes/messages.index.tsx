@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SermonCard } from "@/components/sermon-card";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { sermonsQueryOptions } from "@/lib/sermons";
 
@@ -55,6 +56,7 @@ function MessagesPage() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortId>("newest");
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -101,6 +103,18 @@ function MessagesPage() {
   const shown = filtered.slice(0, visible);
   const isFiltered = series !== "All" || query.trim() !== "" || sort !== "newest";
 
+  const filterRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (!filterRef.current?.contains(e.target as Node)) {
+        setFiltersOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [filtersOpen]);
+
   return (
     <div className="mx-auto max-w-7xl px-5 pb-24 pt-36 sm:px-8">
       <p className="eyebrow">Video library</p>
@@ -108,9 +122,9 @@ function MessagesPage() {
       <p className="mt-5 max-w-xl text-muted-foreground">{DESCRIPTION}</p>
 
       <div className="sticky top-0 z-30 -mx-5 mt-12 bg-background/85 px-5 backdrop-blur sm:-mx-8 sm:px-8">
-        <div className="flex flex-col gap-5 border-y border-border py-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <label className="relative lg:w-80">
+        <div className="flex flex-col gap-4 border-y border-border py-5">
+          <div className="flex items-center gap-3">
+            <label className="relative flex-1 lg:w-80 lg:flex-none">
               <span className="sr-only">Search messages</span>
               <input
                 value={query}
@@ -130,39 +144,86 @@ function MessagesPage() {
               )}
             </label>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                Sort
-              </span>
-              {SORTS.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setSort(s.id)}
-                  data-active={sort === s.id}
-                  className="rounded-full border border-border px-3.5 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground data-[active=true]:border-primary data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {seriesList.map((name) => (
+            <div ref={filterRef} className="relative">
               <button
-                key={name}
                 type="button"
-                onClick={() => setSeries(name)}
-                data-active={series === name}
-                className="rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground data-[active=true]:border-primary data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                aria-expanded={filtersOpen}
+                aria-controls="filter-panel"
+                onClick={() => setFiltersOpen((v) => !v)}
+                className="flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-primary"
               >
-                {name}
-                <span className="ml-2 opacity-70">
-                  {name === "All" ? sermons.length : (counts.get(name) ?? 0)}
-                </span>
+                <SlidersHorizontal className="h-4 w-4" />
+                <span className="hidden sm:inline">Filters</span>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${filtersOpen ? "rotate-180" : ""}`}
+                />
               </button>
-            ))}
+
+              {filtersOpen && (
+                <div
+                  id="filter-panel"
+                  className="absolute right-0 top-full mt-3 w-[min(calc(100vw-2.5rem),28rem)] rounded-3xl border border-border bg-surface p-5 shadow-lift sm:w-[28rem]"
+                >
+                  <div className="space-y-5">
+                    <div>
+                      <span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                        Sort by
+                      </span>
+                      <div className="mt-2.5 flex flex-wrap gap-2">
+                        {SORTS.map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => setSort(s.id)}
+                            data-active={sort === s.id}
+                            className="rounded-full border border-border px-3.5 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground data-[active=true]:border-primary data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                          >
+                            {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                        Series
+                      </span>
+                      <div className="mt-2.5 flex max-h-60 flex-wrap gap-2 overflow-y-auto pr-1">
+                        {seriesList.map((name) => (
+                          <button
+                            key={name}
+                            type="button"
+                            onClick={() => setSeries(name)}
+                            data-active={series === name}
+                            className="rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground data-[active=true]:border-primary data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                          >
+                            {name}
+                            <span className="ml-2 opacity-70">
+                              {name === "All" ? sermons.length : (counts.get(name) ?? 0)}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {isFiltered && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSeries("All");
+                          setQuery("");
+                          setSort("newest");
+                          setFiltersOpen(false);
+                        }}
+                        className="w-full rounded-full border border-border py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary"
+                      >
+                        Reset filters
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
