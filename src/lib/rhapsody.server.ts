@@ -16,6 +16,7 @@ export type Devotional = {
   furtherStudy: string;
   readingA: string;
   readingB: string;
+  audioUrl: string;
   sourceUrl: string;
 };
 
@@ -23,6 +24,17 @@ function isoDate(offsetDays: number) {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() - offsetDays);
   return d.toISOString().slice(0, 10);
+}
+
+const MONTHS = [
+  "january","february","march","april","may","june",
+  "july","august","september","october","november","december",
+];
+
+/** Rhapsody hosts the read-aloud version at /YYYY/monthname/DD.mp3 on their CDN. */
+function audioUrlFor(date: string) {
+  const [year, month, day] = date.split("-");
+  return `https://roraudio.b-cdn.net/${year}/${MONTHS[parseInt(month ?? "1", 10) - 1]}/${day}.mp3`;
 }
 
 function slugify(value: string) {
@@ -76,6 +88,7 @@ async function fetchOne(date: string, token: string): Promise<Devotional | null>
     furtherStudy: stripHtml(entry["study"] ?? ""),
     readingA: stripHtml(entry["BA"] ?? ""),
     readingB: stripHtml(entry["BB"] ?? ""),
+    audioUrl: audioUrlFor(date),
     sourceUrl: HOME,
   };
 }

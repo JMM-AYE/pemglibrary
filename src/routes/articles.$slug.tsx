@@ -140,6 +140,15 @@ function DevotionalPage({ devotional, more }: { devotional: Devotional; more: De
         />
       )}
 
+      {devotional.audioUrl && (
+        <div className="mt-8 rounded-3xl border border-border bg-surface p-5">
+          <p className="eyebrow">Listen &middot; audio version</p>
+          <audio controls preload="none" src={devotional.audioUrl} className="mt-4 w-full">
+            Your browser does not support audio playback.
+          </audio>
+        </div>
+      )}
+
       <div
         className="prose-devotional mt-10 space-y-6 text-lg leading-relaxed text-muted-foreground [&_a]:text-primary [&_strong]:text-foreground"
         dangerouslySetInnerHTML={{ __html: devotional.bodyHtml }}
