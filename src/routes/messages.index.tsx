@@ -144,7 +144,7 @@ function MessagesPage() {
               )}
             </label>
 
-            <div className="relative">
+            <div ref={filterRef} className="relative">
               <button
                 type="button"
                 aria-expanded={filtersOpen}
