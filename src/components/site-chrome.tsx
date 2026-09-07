@@ -10,6 +10,7 @@ const nav = [
   { to: "/live", label: "Live" },
   { to: "/events", label: "Events" },
   { to: "/articles", label: "Articles" },
+  { to: "/salvation", label: "Salvation" },
 ];
 
 export function SiteHeader() {
@@ -129,6 +130,9 @@ export function SiteFooter() {
           </Link>
           <Link to="/events" className="hover:text-foreground">
             Events
+          </Link>
+          <Link to="/salvation" className="hover:text-foreground">
+            Salvation
           </Link>
           {isAdmin && (
             <Link to="/admin" className="hover:text-foreground">
