@@ -103,6 +103,18 @@ function MessagesPage() {
   const shown = filtered.slice(0, visible);
   const isFiltered = series !== "All" || query.trim() !== "" || sort !== "newest";
 
+  const filterRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (!filterRef.current?.contains(e.target as Node)) {
+        setFiltersOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [filtersOpen]);
+
   return (
     <div className="mx-auto max-w-7xl px-5 pb-24 pt-36 sm:px-8">
       <p className="eyebrow">Video library</p>
