@@ -56,6 +56,7 @@ function MessagesPage() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortId>("newest");
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
