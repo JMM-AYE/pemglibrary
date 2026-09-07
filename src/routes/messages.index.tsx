@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SermonCard } from "@/components/sermon-card";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { sermonsQueryOptions } from "@/lib/sermons";
 
