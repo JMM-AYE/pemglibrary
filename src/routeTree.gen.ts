@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SalvationRouteImport } from './routes/salvation'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
@@ -27,6 +28,11 @@ import { Route as ApiPublicNewContentRouteImport } from './routes/api/public/new
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalvationRoute = SalvationRouteImport.update({
+  id: '/salvation',
+  path: '/salvation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/salvation': typeof SalvationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/events/$slug': typeof EventsSlugRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/salvation': typeof SalvationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/events/$slug': typeof EventsSlugRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/salvation': typeof SalvationRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/events/$slug': typeof EventsSlugRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
+    | '/salvation'
     | '/sitemap.xml'
     | '/articles/$slug'
     | '/events/$slug'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
+    | '/salvation'
     | '/sitemap.xml'
     | '/articles/$slug'
     | '/events/$slug'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
+    | '/salvation'
     | '/sitemap.xml'
     | '/articles/$slug'
     | '/events/$slug'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  SalvationRoute: typeof SalvationRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ArticlesSlugRoute: typeof ArticlesSlugRoute
   EventsSlugRoute: typeof EventsSlugRoute
@@ -219,6 +232,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/salvation': {
+      id: '/salvation'
+      path: '/salvation'
+      fullPath: '/salvation'
+      preLoaderRoute: typeof SalvationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -320,6 +340,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  SalvationRoute: SalvationRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ArticlesSlugRoute: ArticlesSlugRoute,
   EventsSlugRoute: EventsSlugRoute,
