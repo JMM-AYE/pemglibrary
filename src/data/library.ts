@@ -245,7 +245,7 @@ export const articles: Article[] = [
       "Himself took our infirmities, and bare our sicknesses (Matthew 8:17).",
     readTime: "5 min read",
     date: "2026-07-12",
-    cover: covers.heroAuditorium,
+    cover: "https://cdn.neocdn.cloud/i/hstv/1074x576-website-4e2ab7.jpg",
     excerpt:
       "Healing is not a special favour reserved for the deserving. It is provision already purchased and already delivered to the family of God.",
     body: [
@@ -265,7 +265,7 @@ export const articles: Article[] = [
       "And Jesus said unto him, Go thy way; thy faith hath made thee whole (Mark 10:52).",
     readTime: "6 min read",
     date: "2026-07-05",
-    cover: seriesDawn,
+    cover: "https://cdn.neocdn.cloud/i/hstv/healing-everyday-1-0f459b.jpg",
     excerpt:
       "A practical guide for hosts and participants: how to set up a viewing centre, invite the sick, and receive with expectation.",
     body: [
@@ -286,7 +286,7 @@ export const articles: Article[] = [
       "And they overcame him by the blood of the Lamb, and by the word of their testimony (Revelation 12:11).",
     readTime: "4 min read",
     date: "2026-06-28",
-    cover: seriesWord,
+    cover: "https://cdn.neocdn.cloud/i/hstv/morning-dew-1-209ce5.jpg",
     excerpt:
       "A testimony is not entertainment. It is evidence, and evidence is what turns hope into the confidence that acts.",
     body: [
