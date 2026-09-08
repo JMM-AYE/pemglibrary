@@ -7,6 +7,7 @@ import { HeroStage } from "@/components/hero-stage";
 import { ArticleCard } from "@/components/cards";
 import { Reveal } from "@/components/reveal";
 import { EventsSection } from "@/components/events-section";
+import { devotionalsQueryOptions, formatDevotionalDate } from "@/lib/devotionals";
 
 const DESCRIPTION =
   "Watch teaching series in full, catch the latest message and read articles that take the Word into everyday life.";
@@ -20,12 +21,18 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: DESCRIPTION },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(sermonsQueryOptions),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(sermonsQueryOptions),
+      context.queryClient.ensureQueryData(devotionalsQueryOptions),
+    ]),
   component: Index,
 });
 
 function Index() {
   const { data } = useSuspenseQuery(sermonsQueryOptions);
+  const { data: devotionals } = useSuspenseQuery(devotionalsQueryOptions);
+  const healing = articles.filter((a) => a.source === "Healing Streams").slice(0, 2);
   const featured = data.sermons[0];
   const latest = data.sermons.slice(1, 7);
 
@@ -131,8 +138,39 @@ function Index() {
             Daily readings from Rhapsody of Realities and healing teaching from Healing Streams.
           </p>
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
-            {articles.slice(0, 4).map((article, i) => (
-              <Reveal key={article.slug} delay={i * 80}>
+            {devotionals.slice(0, 2).map((devotional, i) => (
+              <Reveal key={devotional.slug} delay={i * 80}>
+                <Link
+                  to="/articles/$slug"
+                  params={{ slug: devotional.slug }}
+                  className="card-lift-cool group flex h-full gap-5 rounded-3xl border border-[color:color-mix(in_oklab,var(--sage)_18%,transparent)] bg-[color:color-mix(in_oklab,var(--ink)_88%,var(--background))] p-4"
+                >
+                  {devotional.cover && (
+                    <div className="hidden h-28 w-36 shrink-0 overflow-hidden rounded-2xl sm:block">
+                      <img
+                        src={devotional.cover}
+                        alt={devotional.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-[900ms] ease-[var(--ease-out-expo)] group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div className="min-w-0 py-1">
+                    <p className="eyebrow-cool">
+                      Rhapsody of Realities &middot; {formatDevotionalDate(devotional.date)}
+                    </p>
+                    <h3 className="mt-2 font-display text-lg font-bold uppercase leading-snug">
+                      {devotional.title}
+                    </h3>
+                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                      {devotional.excerpt}
+                    </p>
+                  </div>
+                </Link>
+              </Reveal>
+            ))}
+            {healing.map((article, i) => (
+              <Reveal key={article.slug} delay={(i + 2) * 80}>
                 <ArticleCard article={article} />
               </Reveal>
             ))}
