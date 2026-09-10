@@ -32,7 +32,14 @@ export const Route = createFileRoute("/articles/")({
 const CATEGORIES = ["All", "Rhapsody of Realities", "Healing Streams"] as const;
 
 function ArticlesPage() {
-  const { data: devotionals } = useSuspenseQuery(devotionalsQueryOptions());
+  const { data: english } = useSuspenseQuery(devotionalsQueryOptions());
+  const { language, changeLanguage } = useDevotionalLanguage();
+  const translated = useQuery({
+    ...devotionalsQueryOptions(language),
+    enabled: language !== DEFAULT_LANGUAGE,
+  });
+  const devotionals = language === DEFAULT_LANGUAGE ? english : (translated.data ?? []);
+  const loadingTranslation = language !== DEFAULT_LANGUAGE && translated.isPending;
   const [category, setCategory] = useState<string>("All");
   const healing = articles.filter((a) => a.source === "Healing Streams");
   const showRhapsody = category === "All" || category === "Rhapsody of Realities";
