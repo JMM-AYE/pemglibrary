@@ -1,10 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { articles } from "@/data/library";
 import { ArticleCard } from "@/components/cards";
 import { Reveal } from "@/components/reveal";
-import { devotionalsQueryOptions, formatDevotionalDate } from "@/lib/devotionals";
+import {
+  DEFAULT_LANGUAGE,
+  devotionalsQueryOptions,
+  formatDevotionalDate,
+  formatLanguageName,
+} from "@/lib/devotionals";
+import { useDevotionalLanguage } from "@/hooks/use-devotional-language";
+import { DevotionalLanguagePicker } from "@/components/devotional-language-picker";
 
 const DESCRIPTION =
   "Daily devotional readings from Rhapsody of Realities and healing teaching from Healing Streams — companions to the message library.";
