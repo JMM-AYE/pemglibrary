@@ -13,7 +13,7 @@ export const Route = createFileRoute("/articles/$slug")({
     const article = articles.find((a) => a.slug === params.slug);
     if (article) return { kind: "article", article };
 
-    const devotionals = await context.queryClient.ensureQueryData(devotionalsQueryOptions);
+    const devotionals = await context.queryClient.ensureQueryData(devotionalsQueryOptions());
     const devotional = devotionals.find((d) => d.slug === params.slug);
     if (!devotional) throw notFound();
     return {

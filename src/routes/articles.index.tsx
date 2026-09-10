@@ -18,14 +18,14 @@ export const Route = createFileRoute("/articles/")({
       { property: "og:description", content: DESCRIPTION },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(devotionalsQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(devotionalsQueryOptions()),
   component: ArticlesPage,
 });
 
 const CATEGORIES = ["All", "Rhapsody of Realities", "Healing Streams"] as const;
 
 function ArticlesPage() {
-  const { data: devotionals } = useSuspenseQuery(devotionalsQueryOptions);
+  const { data: devotionals } = useSuspenseQuery(devotionalsQueryOptions());
   const [category, setCategory] = useState<string>("All");
   const healing = articles.filter((a) => a.source === "Healing Streams");
   const showRhapsody = category === "All" || category === "Rhapsody of Realities";
