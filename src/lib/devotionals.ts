@@ -1,8 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getDevotionals, getDevotionalLanguages } from "./rhapsody.functions";
-import { DEFAULT_LANGUAGE } from "./rhapsody.server";
 
-export { DEFAULT_LANGUAGE };
+export const DEFAULT_LANGUAGE = "english";
+
 
 export const LANGUAGE_STORAGE_KEY = "pemg:devotional-language";
 
