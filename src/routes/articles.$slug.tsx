@@ -1,7 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { articles, formatDate, type Article } from "@/data/library";
 import { ArticleCard } from "@/components/cards";
-import { devotionalsQueryOptions, formatDevotionalDate } from "@/lib/devotionals";
+import {
+  DEFAULT_LANGUAGE,
+  devotionalsQueryOptions,
+  formatDevotionalDate,
+  formatLanguageName,
+} from "@/lib/devotionals";
+import { languageFromSlug } from "@/lib/devotional-slug";
 import type { Devotional } from "@/lib/rhapsody.server";
 
 type LoaderData =
@@ -13,7 +19,10 @@ export const Route = createFileRoute("/articles/$slug")({
     const article = articles.find((a) => a.slug === params.slug);
     if (article) return { kind: "article", article };
 
-    const devotionals = await context.queryClient.ensureQueryData(devotionalsQueryOptions);
+    const language = languageFromSlug(params.slug) ?? DEFAULT_LANGUAGE;
+    const devotionals = await context.queryClient.ensureQueryData(
+      devotionalsQueryOptions(language),
+    );
     const devotional = devotionals.find((d) => d.slug === params.slug);
     if (!devotional) throw notFound();
     return {

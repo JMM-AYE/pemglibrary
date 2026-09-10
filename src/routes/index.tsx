@@ -24,14 +24,14 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) =>
     Promise.all([
       context.queryClient.ensureQueryData(sermonsQueryOptions),
-      context.queryClient.ensureQueryData(devotionalsQueryOptions),
+      context.queryClient.ensureQueryData(devotionalsQueryOptions()),
     ]),
   component: Index,
 });
 
 function Index() {
   const { data } = useSuspenseQuery(sermonsQueryOptions);
-  const { data: devotionals } = useSuspenseQuery(devotionalsQueryOptions);
+  const { data: devotionals } = useSuspenseQuery(devotionalsQueryOptions());
   const healing = articles.filter((a) => a.source === "Healing Streams").slice(0, 2);
   const featured = data.sermons[0];
   const latest = data.sermons.slice(1, 7);

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/salvation")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(devotionalsQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(devotionalsQueryOptions()),
   component: SalvationPage,
 });
 
@@ -57,7 +57,7 @@ const SCRIPTURES = [
 ];
 
 function SalvationPage() {
-  const { data: devotionals } = useSuspenseQuery(devotionalsQueryOptions);
+  const { data: devotionals } = useSuspenseQuery(devotionalsQueryOptions());
   const today = devotionals[0];
 
   return (

@@ -1,10 +1,15 @@
 const HOME = "https://read.rhapsodyofrealities.org/";
 const DEVOTIONAL = `${HOME}api/daily-devotional/`;
+const TRANSLATION = `${HOME}api/ror-translations/`;
+const LANGUAGE_LIST = `${HOME}api/list-ror-translations`;
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36";
 
+export const DEFAULT_LANGUAGE = "english";
+
 export type Devotional = {
   slug: string;
+  language: string;
   title: string;
   date: string;
   fullDate: string;
@@ -54,6 +59,16 @@ function stripHtml(html: string) {
     .trim();
 }
 
+/** Slugs carry the language so a detail page can reload the right translation. */
+export function devotionalSlug(language: string, date: string, title: string) {
+  return `rhapsody-${slugify(language)}-${date}-${slugify(title)}`.slice(0, 110);
+}
+
+export function languageFromSlug(slug: string): string | null {
+  const match = /^rhapsody-([a-z0-9-]+?)-\d{4}-\d{2}-\d{2}-/.exec(slug);
+  return match ? (match[1] ?? null) : null;
+}
+
 /** The reader mints a short-lived `_read_IPA` bearer token on page load. */
 async function fetchToken(): Promise<string | null> {
   const res = await fetch(HOME, { headers: { "user-agent": UA } });
@@ -63,10 +78,12 @@ async function fetchToken(): Promise<string | null> {
   return match ? match[1] : null;
 }
 
+function authHeaders(token: string) {
+  return { authorization: `Bearer ${token}`, accept: "application/json", "user-agent": UA };
+}
+
 async function fetchOne(date: string, token: string): Promise<Devotional | null> {
-  const res = await fetch(DEVOTIONAL + date, {
-    headers: { authorization: `Bearer ${token}`, accept: "application/json", "user-agent": UA },
-  });
+  const res = await fetch(DEVOTIONAL + date, { headers: authHeaders(token) });
   if (!res.ok) return null;
   const payload = (await res.json()) as {
     result?: Array<Record<string, string>>;
@@ -76,7 +93,8 @@ async function fetchOne(date: string, token: string): Promise<Devotional | null>
 
   const bodyHtml = entry["body"] ?? "";
   return {
-    slug: `rhapsody-${date}-${slugify(entry["title"])}`.slice(0, 90),
+    slug: devotionalSlug(DEFAULT_LANGUAGE, date, entry["title"]),
+    language: DEFAULT_LANGUAGE,
     title: entry["title"],
     date,
     fullDate: entry["fulldate"] ?? date,
@@ -93,14 +111,49 @@ async function fetchOne(date: string, token: string): Promise<Devotional | null>
   };
 }
 
+/** Translated editions come from a separate endpoint with different field names. */
+async function fetchTranslated(
+  date: string,
+  language: string,
+  token: string,
+): Promise<Devotional | null> {
+  const res = await fetch(`${TRANSLATION}${date}/${encodeURIComponent(language)}`, {
+    headers: authHeaders(token),
+  });
+  if (!res.ok) return null;
+  const payload = (await res.json()) as { devotionals?: Array<Record<string, string>> };
+  const entry = payload.devotionals?.[0];
+  if (!entry?.["title"]) return null;
+
+  const bodyHtml = entry["content_body"] ?? "";
+  const confession = entry["confession_or_prayer"] ?? "";
+  return {
+    slug: devotionalSlug(language, date, entry["title"]),
+    language,
+    title: entry["title"],
+    date,
+    fullDate: entry["upload_date"] ?? date,
+    cover: entry["photo_link"] ?? "",
+    excerpt: (entry["excerpt"] ? stripHtml(entry["excerpt"]) : stripHtml(bodyHtml)).slice(0, 220),
+    bodyHtml,
+    confessionTitle: entry["option"] ?? "Confession",
+    confessionHtml: confession.startsWith("<") ? confession : `<p>${confession}</p>`,
+    furtherStudy: stripHtml(entry["further_study"] ?? ""),
+    readingA: stripHtml(entry["one_yearbb"] ?? ""),
+    readingB: stripHtml(entry["two_yearbb"] ?? ""),
+    audioUrl: language === DEFAULT_LANGUAGE ? audioUrlFor(date) : "",
+    sourceUrl: HOME,
+  };
+}
+
 /* ---------------------------------------------------------------- caching */
 
 /** Per-day devotionals never change once published, so cache them for good. */
 const dayCache = new Map<string, Devotional>();
 
 type Cached = { at: number; value: Devotional[] };
-let listCache: Cached | null = null;
-let inFlight: Promise<Devotional[]> | null = null;
+const listCache = new Map<string, Cached>();
+const inFlight = new Map<string, Promise<Devotional[]>>();
 
 const LIST_TTL_MS = 1000 * 60 * 60 * 6;
 const TOKEN_TTL_MS = 1000 * 60 * 20;
@@ -114,17 +167,22 @@ async function getToken(): Promise<string | null> {
   return token;
 }
 
-async function loadDevotionals(days: number): Promise<Devotional[]> {
+async function loadDevotionals(days: number, language: string): Promise<Devotional[]> {
   const token = await getToken();
   if (!token) return [];
   const results = await Promise.all(
     Array.from({ length: days }, (_, i) => {
       const date = isoDate(i);
-      const hit = dayCache.get(date);
+      const key = `${language}:${date}`;
+      const hit = dayCache.get(key);
       if (hit) return Promise.resolve(hit);
-      return fetchOne(date, token)
+      const request =
+        language === DEFAULT_LANGUAGE
+          ? fetchOne(date, token)
+          : fetchTranslated(date, language, token);
+      return request
         .then((entry) => {
-          if (entry) dayCache.set(date, entry);
+          if (entry) dayCache.set(key, entry);
           return entry;
         })
         .catch(() => null);
@@ -134,19 +192,51 @@ async function loadDevotionals(days: number): Promise<Devotional[]> {
 }
 
 /** Today's devotional plus the previous `days - 1` readings, cached per day. */
-export async function fetchDevotionals(days = 7): Promise<Devotional[]> {
-  if (listCache && Date.now() - listCache.at < LIST_TTL_MS) return listCache.value;
-  if (inFlight) return inFlight;
+export async function fetchDevotionals(
+  days = 7,
+  language: string = DEFAULT_LANGUAGE,
+): Promise<Devotional[]> {
+  const lang = (language || DEFAULT_LANGUAGE).toLowerCase();
+  const cached = listCache.get(lang);
+  if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.value;
+  const pending = inFlight.get(lang);
+  if (pending) return pending;
 
-  inFlight = loadDevotionals(days)
+  const request = loadDevotionals(days, lang)
     .then((value) => {
-      if (value.length) listCache = { at: Date.now(), value };
-      return value.length ? value : (listCache?.value ?? []);
+      if (value.length) listCache.set(lang, { at: Date.now(), value });
+      return value.length ? value : (listCache.get(lang)?.value ?? []);
     })
-    .catch(() => listCache?.value ?? [])
+    .catch(() => listCache.get(lang)?.value ?? [])
     .finally(() => {
-      inFlight = null;
+      inFlight.delete(lang);
     });
 
-  return inFlight;
+  inFlight.set(lang, request);
+  return request;
+}
+
+/* -------------------------------------------------------------- languages */
+
+let languageCache: { at: number; value: string[] } | null = null;
+const LANG_TTL_MS = 1000 * 60 * 60 * 24;
+
+/** Every language Rhapsody currently publishes the daily reading in. */
+export async function fetchLanguages(): Promise<string[]> {
+  if (languageCache && Date.now() - languageCache.at < LANG_TTL_MS) return languageCache.value;
+  try {
+    const token = await getToken();
+    if (!token) return languageCache?.value ?? [DEFAULT_LANGUAGE];
+    const res = await fetch(LANGUAGE_LIST, { headers: authHeaders(token) });
+    if (!res.ok) return languageCache?.value ?? [DEFAULT_LANGUAGE];
+    const payload = (await res.json()) as { languages?: string[] };
+    const list = (payload.languages ?? [])
+      .map((l) => l.trim().toLowerCase())
+      .filter(Boolean);
+    const value = Array.from(new Set([DEFAULT_LANGUAGE, ...list]));
+    languageCache = { at: Date.now(), value };
+    return value;
+  } catch {
+    return languageCache?.value ?? [DEFAULT_LANGUAGE];
+  }
 }
