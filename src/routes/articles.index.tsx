@@ -51,23 +51,50 @@ function ArticlesPage() {
       <h1 className="display mt-4 text-[clamp(2.75rem,8vw,6rem)]">Articles</h1>
       <p className="mt-5 max-w-xl text-muted-foreground">{DESCRIPTION}</p>
 
-      <div className="mt-12 flex flex-wrap gap-2 border-y border-border py-6">
-        {CATEGORIES.map((name) => (
-          <button
-            key={name}
-            type="button"
-            onClick={() => setCategory(name)}
-            data-active={category === name}
-            className="rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground data-[active=true]:border-transparent data-[active=true]:bg-[color:var(--sage)] data-[active=true]:text-[color:var(--ink)]"
-          >
-            {name}
-          </button>
-        ))}
+      <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-y border-border py-6">
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => setCategory(name)}
+              data-active={category === name}
+              className="rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground data-[active=true]:border-transparent data-[active=true]:bg-[color:var(--sage)] data-[active=true]:text-[color:var(--ink)]"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+        <DevotionalLanguagePicker language={language} onChange={changeLanguage} />
       </div>
+
+      {showRhapsody && loadingTranslation && (
+        <p className="mt-10 text-sm text-muted-foreground">
+          Loading today&rsquo;s reading in {formatLanguageName(language)}&hellip;
+        </p>
+      )}
+
+      {showRhapsody && !loadingTranslation && devotionals.length === 0 && (
+        <div className="mt-10 rounded-3xl border border-border p-6">
+          <p className="text-sm text-muted-foreground">
+            The reading isn&rsquo;t published in {formatLanguageName(language)} yet.
+          </p>
+          <button
+            type="button"
+            onClick={() => changeLanguage(DEFAULT_LANGUAGE)}
+            className="mt-3 rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+          >
+            Read in English
+          </button>
+        </div>
+      )}
 
       {showRhapsody && devotionals.length > 0 && (
         <section className="mt-10">
-          <p className="eyebrow-cool">Rhapsody of Realities &middot; daily devotional</p>
+          <p className="eyebrow-cool">
+            Rhapsody of Realities &middot; daily devotional &middot;{" "}
+            {formatLanguageName(language)}
+          </p>
           <div className="mt-5 grid gap-5">
             {devotionals.map((devotional, i) => (
               <Reveal key={devotional.slug} delay={i * 60}>
