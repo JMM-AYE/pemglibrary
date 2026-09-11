@@ -136,7 +136,8 @@ function DevotionalPage({ devotional, more }: { devotional: Devotional; more: De
       </Link>
 
       <p className="eyebrow mt-8">
-        Rhapsody of Realities &middot; {formatDevotionalDate(devotional.date)}
+        Rhapsody of Realities &middot; {formatDevotionalDate(devotional.date)} &middot;{" "}
+        {formatLanguageName(devotional.language ?? DEFAULT_LANGUAGE)}
       </p>
       <h1 className="display mt-4 text-[clamp(2.25rem,6vw,4rem)]">{devotional.title}</h1>
 
