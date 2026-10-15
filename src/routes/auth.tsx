@@ -124,10 +124,27 @@ function AuthPage() {
         if (!data.session) toast.success("Check your email to confirm your account.");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(friendlyAuthError(error));
     } finally {
       setBusy(false);
     }
+  }
+
+  function friendlyAuthError(error: unknown) {
+    const msg = error instanceof Error ? error.message : "";
+    const m = msg.toLowerCase();
+    if (m.includes("invalid login")) return "Wrong email or password. Please try again.";
+    if (m.includes("already registered") || m.includes("already been registered"))
+      return "This email already has an account — please sign in instead.";
+    if (m.includes("not confirmed")) return "Please confirm your email first, or sign up again.";
+    if (m.includes("pwned") || m.includes("weak") || m.includes("leaked"))
+      return "That password is too easy to guess. Please choose a stronger one.";
+    if (m.includes("password should be")) return "Password must be at least 6 characters.";
+    if (m.includes("rate limit") || m.includes("too many"))
+      return "Too many attempts. Please wait a minute and try again.";
+    if (m.includes("valid email") || m.includes("invalid format"))
+      return "Please enter a valid email address.";
+    return msg || "Something went wrong. Please try again.";
   }
 
   async function onCompleteProfile(e: React.FormEvent) {
