@@ -141,7 +141,51 @@ export async function fetchChannelSermons(channelId: string) {
  * one channel (re-uploads, cross-posts) is kept once — the first occurrence
  * wins, and a playlist-derived series name always beats the title heuristic.
  */
-export async function fetchLibrarySermons(channelIds: readonly string[]) {
+type Library = { sermons: Sermon[]; series: string[] };
+
+const LIBRARY_TTL_MS = 15 * 60 * 1000;
+let libraryCache: { key: string; data: Library; at: number } | undefined;
+let libraryInflight: Promise<Library> | undefined;
+
+/**
+ * Merges several channels into one library. A video that appears on more than
+ * one channel (re-uploads, cross-posts) is kept once — the first occurrence
+ * wins, and a playlist-derived series name always beats the title heuristic.
+ *
+ * Results are cached for 15 minutes and concurrent calls share one request,
+ * so page loads don't hammer YouTube. If a refresh fails entirely, the last
+ * good data is served instead of crashing the page.
+ */
+export async function fetchLibrarySermons(channelIds: readonly string[]): Promise<Library> {
+  const key = channelIds.join(",");
+  if (libraryCache?.key === key && Date.now() - libraryCache.at < LIBRARY_TTL_MS) {
+    return libraryCache.data;
+  }
+  if (libraryInflight) return libraryInflight;
+
+  libraryInflight = (async () => {
+    try {
+      const data = await buildLibrary(channelIds);
+      if (data.sermons.length > 0) {
+        libraryCache = { key, data, at: Date.now() };
+        return data;
+      }
+      // Everything failed (rate limit / outage) — serve the last good data.
+      if (libraryCache?.key === key) return libraryCache.data;
+      return data;
+    } catch (error) {
+      console.error("Building the sermon library failed", error);
+      if (libraryCache?.key === key) return libraryCache.data;
+      return { sermons: [], series: [] };
+    } finally {
+      libraryInflight = undefined;
+    }
+  })();
+
+  return libraryInflight;
+}
+
+async function buildLibrary(channelIds: readonly string[]): Promise<Library> {
   const results = await Promise.all(channelIds.map((id) => fetchChannelSermons(id)));
 
   const byId = new Map<string, Sermon>();
