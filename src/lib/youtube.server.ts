@@ -64,16 +64,34 @@ function parseFeed(xml: string, series?: string): Sermon[] {
 
 export type Playlist = { id: string; title: string };
 
+/**
+ * YouTube rate-limits aggressively; a single failed request must never crash
+ * a page load. Every fetch goes through this helper: network errors are
+ * caught, and 429/5xx responses get one retry after a short delay.
+ */
+async function fetchYouTube(url: string, accept?: string): Promise<Response | null> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: { "user-agent": UA, "accept-language": "en", ...(accept ? { accept } : {}) },
+      });
+      if (res.ok) return res;
+      console.error(`YouTube request failed [${res.status}] for ${url}`);
+      if (res.status !== 429 && res.status < 500) return null;
+    } catch (error) {
+      console.error(`YouTube request errored for ${url}`, error);
+    }
+    if (attempt === 0) await new Promise((r) => setTimeout(r, 1500));
+  }
+  return null;
+}
+
 /** Reads the channel's public playlists page and pulls out playlist names + ids. */
 export async function fetchChannelPlaylists(channelId: string): Promise<Playlist[]> {
-  const res = await fetch(
+  const res = await fetchYouTube(
     `https://www.youtube.com/channel/${encodeURIComponent(channelId)}/playlists?hl=en`,
-    { headers: { "user-agent": UA, "accept-language": "en" } },
   );
-  if (!res.ok) {
-    console.error(`YouTube playlists page failed [${res.status}]`);
-    return [];
-  }
+  if (!res) return [];
   const html = await res.text();
   const re =
     /"lockupMetadataViewModel":\{"title":\{"content":"((?:[^"\\]|\\.)*)"[\s\S]{0,3000}?"contentId":"(PL[^"]+)","contentType":"LOCKUP_CONTENT_TYPE_PLAYLIST"/g;
