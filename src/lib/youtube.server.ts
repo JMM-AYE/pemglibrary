@@ -103,13 +103,8 @@ export async function fetchChannelPlaylists(channelId: string): Promise<Playlist
 }
 
 async function fetchFeed(query: string, series?: string): Promise<Sermon[]> {
-  const res = await fetch(`${FEED}${query}`, {
-    headers: { accept: "application/atom+xml", "user-agent": UA },
-  });
-  if (!res.ok) {
-    console.error(`YouTube feed request failed [${res.status}] for ${query}`);
-    return [];
-  }
+  const res = await fetchYouTube(`${FEED}${query}`, "application/atom+xml");
+  if (!res) return [];
   return parseFeed(await res.text(), series);
 }
 
