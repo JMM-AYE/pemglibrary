@@ -64,16 +64,34 @@ function parseFeed(xml: string, series?: string): Sermon[] {
 
 export type Playlist = { id: string; title: string };
 
+/**
+ * YouTube rate-limits aggressively; a single failed request must never crash
+ * a page load. Every fetch goes through this helper: network errors are
+ * caught, and 429/5xx responses get one retry after a short delay.
+ */
+async function fetchYouTube(url: string, accept?: string): Promise<Response | null> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: { "user-agent": UA, "accept-language": "en", ...(accept ? { accept } : {}) },
+      });
+      if (res.ok) return res;
+      console.error(`YouTube request failed [${res.status}] for ${url}`);
+      if (res.status !== 429 && res.status < 500) return null;
+    } catch (error) {
+      console.error(`YouTube request errored for ${url}`, error);
+    }
+    if (attempt === 0) await new Promise((r) => setTimeout(r, 1500));
+  }
+  return null;
+}
+
 /** Reads the channel's public playlists page and pulls out playlist names + ids. */
 export async function fetchChannelPlaylists(channelId: string): Promise<Playlist[]> {
-  const res = await fetch(
+  const res = await fetchYouTube(
     `https://www.youtube.com/channel/${encodeURIComponent(channelId)}/playlists?hl=en`,
-    { headers: { "user-agent": UA, "accept-language": "en" } },
   );
-  if (!res.ok) {
-    console.error(`YouTube playlists page failed [${res.status}]`);
-    return [];
-  }
+  if (!res) return [];
   const html = await res.text();
   const re =
     /"lockupMetadataViewModel":\{"title":\{"content":"((?:[^"\\]|\\.)*)"[\s\S]{0,3000}?"contentId":"(PL[^"]+)","contentType":"LOCKUP_CONTENT_TYPE_PLAYLIST"/g;
@@ -85,13 +103,8 @@ export async function fetchChannelPlaylists(channelId: string): Promise<Playlist
 }
 
 async function fetchFeed(query: string, series?: string): Promise<Sermon[]> {
-  const res = await fetch(`${FEED}${query}`, {
-    headers: { accept: "application/atom+xml", "user-agent": UA },
-  });
-  if (!res.ok) {
-    console.error(`YouTube feed request failed [${res.status}] for ${query}`);
-    return [];
-  }
+  const res = await fetchYouTube(`${FEED}${query}`, "application/atom+xml");
+  if (!res) return [];
   return parseFeed(await res.text(), series);
 }
 
@@ -128,7 +141,51 @@ export async function fetchChannelSermons(channelId: string) {
  * one channel (re-uploads, cross-posts) is kept once — the first occurrence
  * wins, and a playlist-derived series name always beats the title heuristic.
  */
-export async function fetchLibrarySermons(channelIds: readonly string[]) {
+type Library = { sermons: Sermon[]; series: string[] };
+
+const LIBRARY_TTL_MS = 15 * 60 * 1000;
+let libraryCache: { key: string; data: Library; at: number } | undefined;
+let libraryInflight: Promise<Library> | undefined;
+
+/**
+ * Merges several channels into one library. A video that appears on more than
+ * one channel (re-uploads, cross-posts) is kept once — the first occurrence
+ * wins, and a playlist-derived series name always beats the title heuristic.
+ *
+ * Results are cached for 15 minutes and concurrent calls share one request,
+ * so page loads don't hammer YouTube. If a refresh fails entirely, the last
+ * good data is served instead of crashing the page.
+ */
+export async function fetchLibrarySermons(channelIds: readonly string[]): Promise<Library> {
+  const key = channelIds.join(",");
+  if (libraryCache?.key === key && Date.now() - libraryCache.at < LIBRARY_TTL_MS) {
+    return libraryCache.data;
+  }
+  if (libraryInflight) return libraryInflight;
+
+  libraryInflight = (async () => {
+    try {
+      const data = await buildLibrary(channelIds);
+      if (data.sermons.length > 0) {
+        libraryCache = { key, data, at: Date.now() };
+        return data;
+      }
+      // Everything failed (rate limit / outage) — serve the last good data.
+      if (libraryCache?.key === key) return libraryCache.data;
+      return data;
+    } catch (error) {
+      console.error("Building the sermon library failed", error);
+      if (libraryCache?.key === key) return libraryCache.data;
+      return { sermons: [], series: [] };
+    } finally {
+      libraryInflight = undefined;
+    }
+  })();
+
+  return libraryInflight;
+}
+
+async function buildLibrary(channelIds: readonly string[]): Promise<Library> {
   const results = await Promise.all(channelIds.map((id) => fetchChannelSermons(id)));
 
   const byId = new Map<string, Sermon>();
