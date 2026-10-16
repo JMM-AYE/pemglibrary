@@ -226,7 +226,13 @@ export async function fetchLibrarySermons(channelIds: readonly string[]): Promis
 }
 
 async function buildLibrary(channelIds: readonly string[]): Promise<Library> {
-  const results = await Promise.all(channelIds.map((id) => fetchChannelSermons(id)));
+  // Stagger channel requests so we don't hit YouTube with a burst — this is
+  // what triggers the rate limiting in the first place. Each channel is
+  // independent: if one fails, the others still load (see fetchChannelSermons).
+  const results: ChannelResult[] = [];
+  for (const id of channelIds) {
+    results.push(await fetchChannelSermons(id));
+  }
 
   const byId = new Map<string, Sermon>();
   const byTitle = new Map<string, string>();
