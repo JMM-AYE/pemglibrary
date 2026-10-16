@@ -108,11 +108,51 @@ async function fetchFeed(query: string, series?: string): Promise<Sermon[]> {
   return parseFeed(await res.text(), series);
 }
 
+type ChannelResult = { sermons: Sermon[]; series: string[] };
+
+const CHANNEL_TTL_MS = 15 * 60 * 1000;
+const channelCache = new Map<string, { data: ChannelResult; at: number }>();
+const channelInflight = new Map<string, Promise<ChannelResult>>();
+
 /**
  * Builds the library from the channel feed plus every public playlist, so the
  * playlist name becomes the series category shown in the UI.
+ *
+ * Each channel is cached independently for 15 minutes. If a refresh for one
+ * channel fails (rate limit, outage), that channel keeps serving its last
+ * good data while the other channels refresh normally — one bad channel can
+ * never empty the library.
  */
-export async function fetchChannelSermons(channelId: string) {
+export async function fetchChannelSermons(channelId: string): Promise<ChannelResult> {
+  const cached = channelCache.get(channelId);
+  if (cached && Date.now() - cached.at < CHANNEL_TTL_MS) return cached.data;
+  const inflight = channelInflight.get(channelId);
+  if (inflight) return inflight;
+
+  const promise = (async () => {
+    try {
+      const data = await buildChannel(channelId);
+      if (data.sermons.length > 0) {
+        channelCache.set(channelId, { data, at: Date.now() });
+        return data;
+      }
+      // This channel failed entirely — serve its last good data if we have it.
+      if (cached) return cached.data;
+      return data;
+    } catch (error) {
+      console.error(`Building channel ${channelId} failed`, error);
+      if (cached) return cached.data;
+      return { sermons: [], series: [] };
+    } finally {
+      channelInflight.delete(channelId);
+    }
+  })();
+
+  channelInflight.set(channelId, promise);
+  return promise;
+}
+
+async function buildChannel(channelId: string): Promise<ChannelResult> {
   const playlists = await fetchChannelPlaylists(channelId);
 
   const [channelSermons, ...playlistResults] = await Promise.all([
@@ -186,7 +226,13 @@ export async function fetchLibrarySermons(channelIds: readonly string[]): Promis
 }
 
 async function buildLibrary(channelIds: readonly string[]): Promise<Library> {
-  const results = await Promise.all(channelIds.map((id) => fetchChannelSermons(id)));
+  // Stagger channel requests so we don't hit YouTube with a burst — this is
+  // what triggers the rate limiting in the first place. Each channel is
+  // independent: if one fails, the others still load (see fetchChannelSermons).
+  const results: ChannelResult[] = [];
+  for (const id of channelIds) {
+    results.push(await fetchChannelSermons(id));
+  }
 
   const byId = new Map<string, Sermon>();
   const byTitle = new Map<string, string>();
