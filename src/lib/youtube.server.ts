@@ -108,11 +108,51 @@ async function fetchFeed(query: string, series?: string): Promise<Sermon[]> {
   return parseFeed(await res.text(), series);
 }
 
+type ChannelResult = { sermons: Sermon[]; series: string[] };
+
+const CHANNEL_TTL_MS = 15 * 60 * 1000;
+const channelCache = new Map<string, { data: ChannelResult; at: number }>();
+const channelInflight = new Map<string, Promise<ChannelResult>>();
+
 /**
  * Builds the library from the channel feed plus every public playlist, so the
  * playlist name becomes the series category shown in the UI.
+ *
+ * Each channel is cached independently for 15 minutes. If a refresh for one
+ * channel fails (rate limit, outage), that channel keeps serving its last
+ * good data while the other channels refresh normally — one bad channel can
+ * never empty the library.
  */
-export async function fetchChannelSermons(channelId: string) {
+export async function fetchChannelSermons(channelId: string): Promise<ChannelResult> {
+  const cached = channelCache.get(channelId);
+  if (cached && Date.now() - cached.at < CHANNEL_TTL_MS) return cached.data;
+  const inflight = channelInflight.get(channelId);
+  if (inflight) return inflight;
+
+  const promise = (async () => {
+    try {
+      const data = await buildChannel(channelId);
+      if (data.sermons.length > 0) {
+        channelCache.set(channelId, { data, at: Date.now() });
+        return data;
+      }
+      // This channel failed entirely — serve its last good data if we have it.
+      if (cached) return cached.data;
+      return data;
+    } catch (error) {
+      console.error(`Building channel ${channelId} failed`, error);
+      if (cached) return cached.data;
+      return { sermons: [], series: [] };
+    } finally {
+      channelInflight.delete(channelId);
+    }
+  })();
+
+  channelInflight.set(channelId, promise);
+  return promise;
+}
+
+async function buildChannel(channelId: string): Promise<ChannelResult> {
   const playlists = await fetchChannelPlaylists(channelId);
 
   const [channelSermons, ...playlistResults] = await Promise.all([
